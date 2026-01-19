@@ -22,6 +22,12 @@ export const authService = {
       return { valid: false, error: 'Server configuration error' };
     }
 
+    // Bypass for local development
+    if (env.NODE_ENV === 'development' && token === 'dev-token') {
+      console.warn('⚠️  Using DEV TOKEN bypass');
+      return { valid: true, fid: 999999 };
+    }
+
     try {
       const payload = await client.verifyJwt({ 
         token, 
@@ -32,10 +38,12 @@ export const authService = {
         valid: true, 
         fid: Number(payload.sub) 
       };
-    } catch (e) {
-      if (e instanceof Errors.InvalidTokenError) {
-        return { valid: false, error: 'Invalid token' };
+    } catch (e: any) {
+      // Handle jose library specific errors
+      if (e instanceof Errors.InvalidTokenError || e.code === 'ERR_JWS_INVALID') {
+        return { valid: false, error: 'Invalid token format' };
       }
+      
       // Log unexpected errors
       console.error('Auth verification error:', e);
       return { valid: false, error: 'Verification failed' };
