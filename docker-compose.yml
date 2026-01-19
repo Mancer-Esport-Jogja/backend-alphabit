@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "3011:3011"
+    environment:
+      - PORT=3011
+      - NODE_ENV=production
+      - DOMAIN=${DOMAIN:-localhost}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    env_file:
+      - .env
+    restart: always
