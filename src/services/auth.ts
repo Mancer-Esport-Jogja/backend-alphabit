@@ -46,7 +46,7 @@ export const authService = {
       
       // Log unexpected errors
       console.error('Auth verification error:', e);
-      return { valid: false, error: 'Verification failed' };
+      return { valid: false, error: 'Token verification failed' };
     }
   }
 };

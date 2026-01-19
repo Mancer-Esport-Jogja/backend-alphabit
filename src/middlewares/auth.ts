@@ -16,7 +16,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   const authorization = req.headers.authorization;
 
   if (!authorization?.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Unauthorized: Missing or invalid Bearer token' });
+    res.status(401).json({ 
+      success: false, 
+      error: 'Unauthorized: Missing or invalid Bearer token' 
+    });
     return;
   }
 
@@ -24,7 +27,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   const result = await authService.verifyToken(token);
 
   if (!result.valid || !result.fid) {
-    res.status(401).json({ error: result.error || 'Unauthorized' });
+    res.status(401).json({ 
+      success: false, 
+      error: result.error || 'Unauthorized' 
+    });
     return;
   }
 
