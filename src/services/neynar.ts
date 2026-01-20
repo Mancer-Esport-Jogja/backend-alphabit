@@ -1,4 +1,5 @@
-import { env } from '../config/env';
+import { env, isDevelopment } from '../config/env';
+import { isDevUserFid, getDevUserByFid } from '../config/mockData';
 
 /**
  * User data types from Neynar Snapchain API
@@ -56,6 +57,20 @@ export const neynarService = {
       pfpUrl: null,
       primaryEthAddress: null
     };
+
+    // Development bypass - return mock data for dev users
+    if (isDevelopment && isDevUserFid(fid)) {
+      const devUser = getDevUserByFid(fid);
+      if (devUser) {
+        console.warn(`⚠️  [DEV NEYNAR BYPASS] Returning mock profile for FID: ${fid}`);
+        return {
+          username: devUser.username,
+          displayName: devUser.displayName,
+          pfpUrl: devUser.pfpUrl,
+          primaryEthAddress: devUser.primaryEthAddress
+        };
+      }
+    }
 
     if (!env.NEYNAR_API_KEY) {
       console.warn('NEYNAR_API_KEY not set, skipping profile fetch');

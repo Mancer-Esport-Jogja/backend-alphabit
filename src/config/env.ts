@@ -12,6 +12,11 @@ export const env = {
   NEYNAR_API_KEY: process.env.NEYNAR_API_KEY || '',
 };
 
+/**
+ * Helper to check if running in development mode
+ */
+export const isDevelopment = env.NODE_ENV === 'development';
+
 if (!env.DOMAIN && env.NODE_ENV === 'production') {
   console.warn('WARNING: DOMAIN is not set in environment variables. Authentication may fail.');
 }

@@ -1,5 +1,6 @@
 import { createClient, Errors } from '@farcaster/quick-auth';
-import { env } from '../config/env';
+import { env, isDevelopment } from '../config/env';
+import { isDevToken, getDevUserByToken } from '../config/mockData';
 
 // Initialize the Quick Auth client
 const client = createClient();
@@ -17,15 +18,19 @@ export const authService = {
    * @returns Verification result containing validity and FID if successful.
    */
   verifyToken: async (token: string): Promise<VerificationResult> => {
+    // Development bypass - only in development mode with dev tokens
+    if (isDevelopment && isDevToken(token)) {
+      const devUser = getDevUserByToken(token);
+      if (devUser) {
+        console.warn(`⚠️  [DEV AUTH BYPASS] Using dev user: ${devUser.username} (FID: ${devUser.fid})`);
+        return { valid: true, fid: devUser.fid };
+      }
+    }
+
+    // Production validation
     if (!env.DOMAIN) {
       console.error('DOMAIN env var is missing');
       return { valid: false, error: 'Server configuration error' };
-    }
-
-    // Bypass for local development
-    if (env.NODE_ENV === 'development' && token === 'dev-token') {
-      console.warn('⚠️  Using DEV TOKEN bypass');
-      return { valid: true, fid: 999999 };
     }
 
     try {
