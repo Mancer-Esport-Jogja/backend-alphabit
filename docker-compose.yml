@@ -7,7 +7,7 @@ services:
       - "3011:3011"
     environment:
       - PORT=3011
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DOMAIN=${DOMAIN:-localhost}
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
     env_file:
