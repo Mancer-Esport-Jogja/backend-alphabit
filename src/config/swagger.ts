@@ -54,12 +54,8 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
       description: 'User profile management'
     },
     {
-      name: 'Orders',
-      description: 'Order management'
-    },
-    {
-      name: 'Positions',
-      description: 'User positions and history'
+      name: 'Nuts',
+      description: 'Thetanuts Finance integration (orders and positions)'
     },
     {
       name: 'System',

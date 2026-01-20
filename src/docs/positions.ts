@@ -2,7 +2,7 @@
  * Positions API documentation
  */
 export const positionsPaths = {
-  '/positions': {
+  '/nuts/positions': {
     post: {
       summary: 'Get user positions or history',
       description: `
@@ -12,7 +12,7 @@ Fetches user positions or history from Thetanuts Finance.
 - \`open\` - Returns current open positions
 - \`history\` - Returns position history
       `,
-      tags: ['Positions'],
+      tags: ['Nuts'],
       requestBody: {
         required: true,
         content: {

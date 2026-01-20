@@ -2,11 +2,11 @@
  * Orders API documentation
  */
 export const ordersPaths = {
-  '/orders': {
+  '/nuts/orders': {
     get: {
       summary: 'Get orders list',
       description: 'Fetches orders from external provider (proxy to external service)',
-      tags: ['Orders'],
+      tags: ['Nuts'],
       responses: {
         '200': {
           description: 'Orders retrieved successfully',

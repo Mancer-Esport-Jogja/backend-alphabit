@@ -137,15 +137,11 @@ http://localhost:3000/api/docs
 | GET | `/api/system/health` | Health check | ❌ |
 | GET | `/api/health` | Root health check | ❌ |
 
-#### Orders
+#### Nuts (Thetanuts Finance)
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/api/orders` | Get orders list | ❌ |
-
-#### Positions
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/positions` | Get user positions/history | ❌ |
+| GET | `/api/nuts/orders` | Get orders list | ❌ |
+| POST | `/api/nuts/positions` | Get user positions/history | ❌ |
 
 ---
 
