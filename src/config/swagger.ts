@@ -24,7 +24,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
 
 ### Base URL
 - **Development**: \`http://localhost:3000\`
-- **Production**: \`https://api.alphabit.app\`
+- **Production**: \`http://be.alphabit.mfahrurozi.my.id\`
     `,
     contact: {
       name: 'Alphabit Team'
@@ -40,7 +40,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
       description: 'Development server'
     },
     {
-      url: 'https://api.alphabit.app',
+      url: 'http://be.alphabit.mfahrurozi.my.id/',
       description: 'Production server'
     }
   ],
