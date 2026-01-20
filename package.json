@@ -5,8 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "dev": "nodemon src/index.ts"
+    "build": "prisma generate && tsc",
+    "dev": "nodemon src/index.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
@@ -14,11 +18,13 @@
   "type": "commonjs",
   "dependencies": {
     "@farcaster/quick-auth": "^0.0.8",
+    "@prisma/client": "^7.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "prisma": "^7.2.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
