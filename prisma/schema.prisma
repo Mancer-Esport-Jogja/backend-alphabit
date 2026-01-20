@@ -14,14 +14,20 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  walletAddress  String   @unique @db.VarChar(42)
-  fid            BigInt?  @unique
-  pictureProfile String?  @map("picture_profile")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  lastActiveAt   DateTime @default(now()) @map("last_active_at")
+  id                 String   @id @default(cuid())
+  fid                BigInt   @unique
 
-  @@index([walletAddress])
+  username           String?  @unique
+  displayName        String?  @map("display_name")
+  pfpUrl             String?  @map("pfp_url")
+
+  primaryEthAddress  String?  @map("primary_eth_address") @db.VarChar(42)
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  lastActiveAt       DateTime @default(now()) @map("last_active_at")
+
+  @@index([fid])
+  @@index([primaryEthAddress])
   @@map("users")
 }
