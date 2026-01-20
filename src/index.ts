@@ -11,7 +11,9 @@ import { errorHandler } from './middlewares/errorHandler';
 const app = express();
 
 // Middleware
-app.use(helmet()); 
+app.use(helmet({
+  contentSecurityPolicy: env.NODE_ENV === 'production' ? undefined : false // Disable CSP for Swagger in dev
+})); 
 app.use(morgan('dev')); 
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
@@ -22,7 +24,7 @@ if (env.NODE_ENV !== 'production') {
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: 'Alphabit API Docs'
   }));
-  console.log('📚 Swagger docs available at /api-docs');
+  console.log('📚 Swagger docs available at /docs');
 }
 
 // Routes
