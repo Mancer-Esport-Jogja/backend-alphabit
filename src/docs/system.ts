@@ -67,8 +67,8 @@ export const systemPaths = {
   },
   '/health': {
     get: {
-      summary: 'Root health check',
-      description: 'Simple health check endpoint at root level',
+      summary: 'API Health check',
+      description: 'Simple health check endpoint at /api/health',
       tags: ['System'],
       responses: {
         '200': {

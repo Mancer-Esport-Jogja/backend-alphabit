@@ -37,7 +37,7 @@ export const DEV_TOKEN_PREFIX = 'dev-token';
  */
 export const DEV_USERS: DevUser[] = [
   {
-    fid: 999999,
+    fid: 1372451,
     username: 'dev_user',
     displayName: 'Development User',
     pfpUrl: 'https://i.imgur.com/YQwNqvu.png',

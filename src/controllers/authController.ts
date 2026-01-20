@@ -56,7 +56,7 @@ export const authController = {
             username: profileData.username || user.username,
             displayName: profileData.displayName || user.displayName,
             pfpUrl: profileData.pfpUrl || user.pfpUrl,
-            primaryEthAddress: profileData.primaryEthAddress || user.primaryEthAddress
+            // primaryEthAddress: profileData.primaryEthAddress || user.primaryEthAddress
           }
         });
       }

@@ -114,7 +114,7 @@ docker-compose up --build -d
 
 Interactive API documentation available at:
 ```
-http://localhost:3000/api-docs
+http://localhost:3000/api/docs
 ```
 > ⚠️ **Note**: Swagger UI is automatically disabled in production (`NODE_ENV=production`).
 
@@ -123,19 +123,19 @@ http://localhost:3000/api-docs
 #### Auth
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| POST | `/auth` | Authenticate/register user | ✅ Bearer |
+| POST | `/api/auth` | Authenticate/register user | ✅ Bearer |
 
 #### Users
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/users/me` | Get current user profile | ✅ Bearer |
+| GET | `/api/users/me` | Get current user profile | ✅ Bearer |
 
 #### System
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/system/info` | Service information | ❌ |
-| GET | `/system/health` | Health check | ❌ |
-| GET | `/health` | Root health check | ❌ |
+| GET | `/api/system/info` | Service information | ❌ |
+| GET | `/api/system/health` | Health check | ❌ |
+| GET | `/api/health` | Root health check | ❌ |
 
 ---
 
@@ -216,7 +216,7 @@ This service uses **Farcaster Quick Auth** for authentication.
 ```
 1. FE: Connect wallet in mini-app → Get walletAddress
 2. FE: Farcaster Quick Auth → Get JWT token (contains FID)
-3. FE: POST /auth with Bearer token + walletAddress
+3. FE: POST /api/auth with Bearer token + walletAddress
 4. BE: Verify token → Extract FID → Create/Update user
 ```
 
@@ -247,18 +247,18 @@ This returns a mock user with `fid: 999999`.
 
 **Health Check:**
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3000/api/health
 ```
 
 **Authenticate/Register User (Protected):**
 ```bash
-curl -X POST http://localhost:3000/auth \
+curl -X POST http://localhost:3000/api/auth \
   -H "Authorization: Bearer dev-token"
 ```
 
 **Get User Profile (Protected):**
 ```bash
-curl http://localhost:3000/users/me \
+curl http://localhost:3000/api/users/me \
   -H "Authorization: Bearer dev-token"
 ```
 

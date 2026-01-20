@@ -36,11 +36,11 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
   },
   servers: [
     {
-      url: 'http://localhost:3000',
+      url: 'http://localhost:3000/api',
       description: 'Development server'
     },
     {
-      url: 'http://be.alphabit.mfahrurozi.my.id/',
+      url: 'http://be.alphabit.mfahrurozi.my.id/api',
       description: 'Production server'
     }
   ],
