@@ -1,4 +1,4 @@
-import { schemas, authPaths, usersPaths, systemPaths, ordersPaths } from '../docs';
+import { schemas, authPaths, usersPaths, systemPaths, ordersPaths, positionsPaths } from '../docs';
 
 /**
  * Swagger/OpenAPI Configuration
@@ -58,6 +58,10 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
       description: 'Order management'
     },
     {
+      name: 'Positions',
+      description: 'User positions and history'
+    },
+    {
       name: 'System',
       description: 'System information and health checks'
     }
@@ -77,6 +81,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
     ...authPaths,
     ...usersPaths,
     ...ordersPaths,
+    ...positionsPaths,
     ...systemPaths
   }
 };

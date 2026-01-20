@@ -142,6 +142,11 @@ http://localhost:3000/api/docs
 |--------|----------|-------------|------|
 | GET | `/api/orders` | Get orders list | ❌ |
 
+#### Positions
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/positions` | Get user positions/history | ❌ |
+
 ---
 
 ## 🗄️ Database Schema
