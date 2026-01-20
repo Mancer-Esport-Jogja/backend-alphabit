@@ -137,6 +137,11 @@ http://localhost:3000/api/docs
 | GET | `/api/system/health` | Health check | ❌ |
 | GET | `/api/health` | Root health check | ❌ |
 
+#### Orders
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/orders` | Get orders list | ❌ |
+
 ---
 
 ## 🗄️ Database Schema
