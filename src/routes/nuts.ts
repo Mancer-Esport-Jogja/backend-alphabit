@@ -1,13 +1,18 @@
 import { Router } from 'express';
-import ordersRoutes from './orders';
-import positionsRoutes from './positions';
+import { nutsController } from '../controllers/nutsController';
 
 const router = Router();
 
-// /nuts/orders
-router.use('/orders', ordersRoutes);
+// GET /nuts/orders
+router.get('/orders', nutsController.getOrders);
 
-// /nuts/positions
-router.use('/positions', positionsRoutes);
+// POST /nuts/positions
+router.post('/positions', nutsController.getPositions);
+
+// GET /nuts/update
+router.get('/update', nutsController.getUpdate);
+
+// GET /nuts/stats
+router.get('/stats', nutsController.getStats);
 
 export default router;

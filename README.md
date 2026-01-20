@@ -142,6 +142,8 @@ http://localhost:3000/api/docs
 |--------|----------|-------------|------|
 | GET | `/api/nuts/orders` | Get orders list | ❌ |
 | POST | `/api/nuts/positions` | Get user positions/history | ❌ |
+| GET | `/api/nuts/update` | Get update info | ❌ |
+| GET | `/api/nuts/stats` | Get stats | ❌ |
 
 ---
 
