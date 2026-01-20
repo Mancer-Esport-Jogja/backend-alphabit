@@ -10,6 +10,10 @@ export const env = {
   DOMAIN: process.env.DOMAIN || '', // Required for Farcaster Auth
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   NEYNAR_API_KEY: process.env.NEYNAR_API_KEY || '',
+  // Thetanuts Integration
+  ALPHABIT_REFERRER_ADDRESS: process.env.ALPHABIT_REFERRER_ADDRESS || '',
+  THETANUTS_INDEXER_URL: process.env.THETANUTS_INDEXER_URL || 'https://optionbook-indexer.thetanuts.finance/api/v1',
+  THETANUTS_ORDERS_URL: process.env.THETANUTS_ORDERS_URL || 'https://round-snowflake-9c31.devops-118.workers.dev/',
 };
 
 /**

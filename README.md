@@ -137,13 +137,22 @@ http://localhost:3000/api/docs
 | GET | `/api/system/health` | Health check | ❌ |
 | GET | `/api/health` | Root health check | ❌ |
 
-#### Nuts (Thetanuts Finance)
+#### Nuts - Thetanuts Finance (Public)
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/api/nuts/orders` | Get orders list | ❌ |
+| GET | `/api/nuts/config` | Get contracts, ABIs, referrer | ❌ |
+| GET | `/api/nuts/orders` | Get available orders | ❌ |
 | POST | `/api/nuts/positions` | Get user positions/history | ❌ |
-| GET | `/api/nuts/update` | Get update info | ❌ |
-| GET | `/api/nuts/stats` | Get stats | ❌ |
+| POST | `/api/nuts/update` | Trigger sync after trade | ❌ |
+| GET | `/api/nuts/stats` | Get protocol stats | ❌ |
+| POST | `/api/nuts/payout/calculate` | Calculate option payout | ❌ |
+
+#### Nuts - Trades (Protected)
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/nuts/trades/sync` | Sync trades to database | ✅ Bearer |
+| GET | `/api/nuts/trades` | Get user trades from DB | ✅ Bearer |
+| GET | `/api/nuts/trades/stats` | Get trade statistics | ✅ Bearer |
 
 ---
 
@@ -163,6 +172,38 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   lastActiveAt       DateTime @default(now())
+
+  trades             TradeActivity[]
+}
+
+model TradeActivity {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(...)
+  
+  optionAddress   String      // Thetanuts option contract
+  txHash          String      @unique
+  status          TradeStatus // OPEN | SETTLED | EXPIRED
+  
+  underlyingAsset String      // BTC | ETH
+  optionType      String      // CALL_SPREAD | PUT_BUTTERFLY etc
+  isCall          Boolean
+  isLong          Boolean
+  strikes         Json        // Strike prices array
+  expiryTimestamp DateTime
+  
+  // Financial data
+  entryPremium    String
+  numContracts    String
+  collateralAmount String
+  
+  // Settlement (for settled trades)
+  settlementPrice String?
+  payoutBuyer     String?
+  payoutSeller    String?
+  
+  createdAt       DateTime @default(now())
+  settledAt       DateTime?
 }
 ```
 

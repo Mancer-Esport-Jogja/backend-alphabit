@@ -27,7 +27,70 @@ model User {
   updatedAt          DateTime @updatedAt @map("updated_at")
   lastActiveAt       DateTime @default(now()) @map("last_active_at")
 
+  // Relations
+  trades             TradeActivity[]
+
   @@index([fid])
   @@index([primaryEthAddress])
   @@map("users")
+}
+
+/// Trade status enum
+enum TradeStatus {
+  OPEN
+  SETTLED
+  EXPIRED
+}
+
+/// Trade activity model for storing user's Thetanuts positions
+model TradeActivity {
+  id              String      @id @default(cuid())
+  userId          String      @map("user_id")
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Identifiers from Thetanuts
+  optionAddress   String      @map("option_address")
+  txHash          String      @unique @map("tx_hash")
+  status          TradeStatus @default(OPEN)
+  
+  // Order details
+  underlyingAsset String      @map("underlying_asset")  // "BTC" | "ETH"
+  optionType      String      @map("option_type")       // "CALL_SPREAD" | "PUT_BUTTERFLY" etc
+  isCall          Boolean     @map("is_call")
+  isLong          Boolean     @map("is_long")
+  strikes         Json                                   // Array of strike prices (raw strings)
+  expiryTimestamp DateTime    @map("expiry_timestamp")
+  
+  // Parties
+  buyer           String
+  seller          String
+  referrer        String?
+  
+  // Financial data (stored as strings to preserve precision)
+  collateralToken   String    @map("collateral_token")
+  collateralSymbol  String    @map("collateral_symbol")
+  collateralDecimals Int      @map("collateral_decimals")
+  entryPremium      String    @map("entry_premium")
+  entryFeePaid      String    @map("entry_fee_paid")
+  numContracts      String    @map("num_contracts")
+  collateralAmount  String    @map("collateral_amount")
+  
+  // Settlement data (only for settled trades)
+  settlementPrice   String?   @map("settlement_price")
+  payoutBuyer       String?   @map("payout_buyer")
+  payoutSeller      String?   @map("payout_seller")
+  
+  // Timestamps
+  entryTimestamp    DateTime  @map("entry_timestamp")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  settledAt         DateTime? @map("settled_at")
+  
+  @@index([userId, createdAt])
+  @@index([userId, status])
+  @@index([status])
+  @@index([optionAddress])
+  @@index([txHash])
+  @@index([referrer])
+  @@map("trade_activities")
 }
