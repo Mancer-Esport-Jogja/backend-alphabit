@@ -4,9 +4,9 @@ services:
   api:
     build: .
     ports:
-      - "3013:3013"
+      - "3014:3014"
     environment:
-      - PORT=3013
+      - PORT=3014
       - NODE_ENV=development
       - DOMAIN=${DOMAIN:-localhost}
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
