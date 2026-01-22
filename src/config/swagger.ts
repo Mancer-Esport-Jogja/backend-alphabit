@@ -23,8 +23,7 @@ Backend service for Alphabit Web3 Mini-App.
 Most endpoints require a Bearer token from Farcaster Quick Auth.
 
 ### Base URL
-- **Development**: \`http://localhost:3000\`
-- **Production**: \`http://be.alphabit.mfahrurozi.my.id\`
+- **Production**: \`https://be.alphabit.mfahrurozi.my.id\`
     `,
     contact: {
       name: 'Alphabit Team'
@@ -36,11 +35,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
   },
   servers: [
     {
-      url: 'http://localhost:3000/api',
-      description: 'Development server'
-    },
-    {
-      url: 'http://be.alphabit.mfahrurozi.my.id/api',
+      url: 'https://be.alphabit.mfahrurozi.my.id/api',
       description: 'Production server'
     }
   ],
