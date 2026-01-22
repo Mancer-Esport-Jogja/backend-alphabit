@@ -38,7 +38,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/generated ./src/generated
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3013
 
 # Set NODE_ENV
 ENV NODE_ENV=production
