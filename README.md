@@ -205,6 +205,15 @@ model TradeActivity {
   createdAt       DateTime @default(now())
   settledAt       DateTime?
 }
+
+model Config {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 ```
 
 ### Database Commands
@@ -215,6 +224,40 @@ model TradeActivity {
 | `npm run db:migrate` | Run migrations (dev) |
 | `npm run db:push` | Push schema to database |
 | `npm run db:studio` | Open Prisma Studio GUI |
+| `npx prisma db seed` | Seed initial config data |
+
+---
+
+## ⚙️ Dynamic Configuration
+
+The application supports **dynamic configuration** stored in the database. This allows updating settings without restarting the service.
+
+### Configurable Keys
+
+| Key | Description | Default |
+|-----|-------------|---------|
+| `THETANUTS_INDEXER_URL` | Thetanuts indexer API URL | `https://optionbook-indexer.thetanuts.finance/api/v1` |
+| `ALPHABIT_REFERRER_ADDRESS` | Referrer wallet address | *(empty)* |
+
+### How It Works
+
+1. **ConfigService** checks the `configs` table in the database
+2. If found, uses the database value
+3. If not found, falls back to `.env` value
+
+### Updating Configuration
+
+**Via SQL:**
+```sql
+UPDATE configs SET value = 'https://new-url.com' WHERE key = 'THETANUTS_INDEXER_URL';
+```
+
+**Via Prisma Studio:**
+```bash
+npx prisma studio
+```
+
+> ✅ Changes take effect immediately on the next API request - no restart needed.
 
 ---
 
@@ -247,11 +290,13 @@ src/
 │   ├── users.ts
 │   └── system.ts
 ├── services/         # Business logic & external services
-│   └── auth.ts       # Auth service (token verification)
+│   ├── auth.ts       # Auth service (token verification)
+│   └── configService.ts  # Dynamic config from DB
 └── index.ts          # Application entry point
 
 prisma/
-└── schema.prisma     # Database schema
+├── schema.prisma     # Database schema
+└── seed.ts           # Database seeding script
 ```
 
 ---

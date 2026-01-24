@@ -94,3 +94,16 @@ model TradeActivity {
   @@index([referrer])
   @@map("trade_activities")
 }
+
+/// Configuration table for dynamic application settings
+model Config {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("configs")
+}

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { env } from '../config/env';
+import { configService } from '../services/configService';
 import { CONTRACTS, OPTION_BOOK_ABI, ERC20_ABI } from '../config/thetanutsConfig';
 import { ThetanutsApiError, ErrorCodes, createErrorResponse } from '../lib/errors';
 import { 
@@ -49,14 +50,14 @@ export const nutsController = {
       res.status(200).json({
         success: true,
         data: {
-          referrer: env.ALPHABIT_REFERRER_ADDRESS,
+          referrer: await configService.get('ALPHABIT_REFERRER_ADDRESS'),
           contracts: CONTRACTS,
           abi: {
             optionBook: OPTION_BOOK_ABI,
             erc20: ERC20_ABI,
           },
           urls: {
-            indexer: env.THETANUTS_INDEXER_URL,
+            indexer: await configService.get('THETANUTS_INDEXER_URL'),
             orders: env.THETANUTS_ORDERS_URL,
           },
         },
@@ -123,14 +124,14 @@ export const nutsController = {
 
       let url: string;
 
-      if (type === 'all') {
+        if (type === 'all') {
         if (address) {
           return res.status(400).json(createErrorResponse(
             ErrorCodes.INVALID_ADDRESS,
             'Address must be null or empty when type is "all"'
           ));
         }
-        url = `${env.THETANUTS_INDEXER_URL}/open-positions`;
+        url = `${await configService.get('THETANUTS_INDEXER_URL')}/open-positions`;
       } else {
         if (!address) {
           return res.status(400).json(createErrorResponse(
@@ -139,7 +140,7 @@ export const nutsController = {
           ));
         }
         const endpoint = type === 'open' ? 'positions' : 'history';
-        url = `${env.THETANUTS_INDEXER_URL}/user/${address}/${endpoint}`;
+        url = `${await configService.get('THETANUTS_INDEXER_URL')}/user/${address}/${endpoint}`;
       }
 
       const response = await fetch(url);
@@ -155,10 +156,11 @@ export const nutsController = {
       let data: ThetanutsPosition[] = await response.json();
 
       // Filter by Alphabit referrer if requested and referrer is configured
-      if (filterByReferrer && env.ALPHABIT_REFERRER_ADDRESS && Array.isArray(data)) {
+      const referrerAddress = await configService.get('ALPHABIT_REFERRER_ADDRESS');
+      if (filterByReferrer && referrerAddress && Array.isArray(data)) {
         data = data.filter(
           (position) => 
-            position.referrer?.toLowerCase() === env.ALPHABIT_REFERRER_ADDRESS.toLowerCase()
+            position.referrer?.toLowerCase() === referrerAddress.toLowerCase()
         );
       }
 
@@ -168,7 +170,7 @@ export const nutsController = {
         meta: {
           count: data.length,
           filteredByReferrer: filterByReferrer,
-          referrer: filterByReferrer ? env.ALPHABIT_REFERRER_ADDRESS : undefined,
+          referrer: filterByReferrer ? referrerAddress : undefined,
         },
       });
     } catch (error) {
@@ -194,7 +196,8 @@ export const nutsController = {
    */
   triggerUpdate: async (_req: Request, res: Response) => {
     try {
-      const response = await fetch(`${env.THETANUTS_INDEXER_URL}/update`, {
+      const indexerUrl = await configService.get('THETANUTS_INDEXER_URL');
+      const response = await fetch(`${indexerUrl}/update`, {
         method: 'POST',
       });
       
@@ -231,7 +234,8 @@ export const nutsController = {
    */
   getStats: async (_req: Request, res: Response) => {
     try {
-      const response = await fetch(`${env.THETANUTS_INDEXER_URL}/stats`);
+      const indexerUrl = await configService.get('THETANUTS_INDEXER_URL');
+      const response = await fetch(`${indexerUrl}/stats`);
       
       if (!response.ok) {
         throw new ThetanutsApiError(
