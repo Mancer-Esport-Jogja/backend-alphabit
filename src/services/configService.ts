@@ -41,8 +41,8 @@ export const configService = {
     if (key === 'SYNC_SCHEDULER_ENABLED') {
       return String(env.SYNC_SCHEDULER_ENABLED);
     }
-    if (key === 'SYNC_INTERVAL_MINUTES') {
-      return String(env.SYNC_INTERVAL_MINUTES);
+    if (key === 'SYNC_INTERVAL_MS') {
+      return String(env.SYNC_INTERVAL_MS);
     }
     if (key === 'SYNC_DELAY_AFTER_UPDATE') {
       return String(env.SYNC_DELAY_AFTER_UPDATE);

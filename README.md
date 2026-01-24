@@ -253,7 +253,7 @@ The application supports **dynamic configuration** stored in the database. This 
 | `ALPHABIT_REFERRER_ADDRESS` | Referrer wallet address | *(empty)* |
 | `SYNC_SCHEDULER_ENABLED` | Enable/disable background sync | `false` |
 | `SYNC_DELAY_AFTER_UPDATE` | Delay (ms) after indexer update | `10000` |
-| `SYNC_INTERVAL_MINUTES` | Sync interval (requires restart) | `15` |
+| `SYNC_INTERVAL_MS` | Sync interval (ms) - Dynamic | `900000` (15m) |
 
 ### How It Works
 
@@ -265,7 +265,7 @@ The application supports **dynamic configuration** stored in the database. This 
 
 **Via SQL:**
 ```sql
-UPDATE configs SET value = 'https://new-url.com' WHERE key = 'THETANUTS_INDEXER_URL';
+UPDATE configs SET value = '30000' WHERE key = 'SYNC_INTERVAL_MS'; -- 30 seconds
 ```
 
 **Via Prisma Studio:**
@@ -273,7 +273,7 @@ UPDATE configs SET value = 'https://new-url.com' WHERE key = 'THETANUTS_INDEXER_
 npx prisma studio
 ```
 
-> ✅ Changes take effect immediately on the next API request - no restart needed (except `SYNC_INTERVAL_MINUTES`).
+> ✅ All changes take effect immediately on nature scheduler cycle - no restart needed.
 
 ---
 

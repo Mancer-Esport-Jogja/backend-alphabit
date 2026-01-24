@@ -16,7 +16,7 @@ export const env = {
   THETANUTS_ORDERS_URL: process.env.THETANUTS_ORDERS_URL || 'https://round-snowflake-9c31.devops-118.workers.dev/',
   // Sync Scheduler Config
   SYNC_SCHEDULER_ENABLED: process.env.SYNC_SCHEDULER_ENABLED === 'true', // Default false
-  SYNC_INTERVAL_MINUTES: parseInt(process.env.SYNC_INTERVAL_MINUTES || '15', 10),
+  SYNC_INTERVAL_MS: parseInt(process.env.SYNC_INTERVAL_MS || '900000', 10), // Default 15 min (15 * 60 * 1000)
   SYNC_DELAY_AFTER_UPDATE: parseInt(process.env.SYNC_DELAY_AFTER_UPDATE || '10000', 10), // 10s default
 };
 

@@ -1,56 +1,77 @@
-import * as cron from 'node-cron';
 import { env } from '../config/env';
 import { configService } from './configService';
 import { syncAllActiveUsers, triggerIndexerUpdate } from './tradeService';
 
-// Store cron task references for graceful shutdown
-let scheduledSyncTask: cron.ScheduledTask | null = null;
+// Store timeout reference for graceful shutdown
+let schedulerTimeout: NodeJS.Timeout | null = null;
+let isSchedulerRunning = false;
 
 /**
- * Initialize all scheduler jobs
+ * Initialize scheduler loop
  */
 export async function initScheduler(): Promise<void> {
   const enabled = await configService.get('SYNC_SCHEDULER_ENABLED') === 'true';
-  const interval = parseInt(await configService.get('SYNC_INTERVAL_MINUTES'), 10) || 15;
+  const interval = parseInt(await configService.get('SYNC_INTERVAL_MS'), 10) || 900000; // 15 min default
 
   if (!enabled) {
-    console.log('[Scheduler] Scheduler is disabled via config');
-    return;
+    console.log('[Scheduler] Scheduler starts disabled (check config to enable)');
+  } else {
+    console.log(`[Scheduler] Starting scheduler service (Interval: ${interval}ms)...`);
   }
 
-  console.log('[Scheduler] Starting scheduler service...');
-
-  // Scheduled Sync - runs every N minutes
-  const cronExpression = `*/${interval} * * * *`;
-  
-  scheduledSyncTask = cron.schedule(cronExpression, async () => {
-    // Check enabled status dynamically every run
-    const dynamicEnabled = await configService.get('SYNC_SCHEDULER_ENABLED') === 'true';
-    if (!dynamicEnabled) {
-      console.log('[Scheduler] Sync skipped (disabled in config)');
-      return;
-    }
-
-    console.log('[Scheduler] Starting scheduled sync cycle...');
-    await runScheduledSync();
-  });
-
-  console.log(`[Scheduler] Scheduled sync configured: every ${interval} minutes`);
-  console.log('[Scheduler] Scheduler service started successfully');
+  // Start the loop immediately
+  if (!isSchedulerRunning) {
+    isSchedulerRunning = true;
+    scheduleNextLoop(enabled ? 0 : interval);
+  }
 }
 
 /**
- * Stop all scheduler jobs gracefully
+ * Stop scheduler gracefully
  */
 export function stopScheduler(): void {
   console.log('[Scheduler] Stopping scheduler service...');
-  
-  if (scheduledSyncTask) {
-    scheduledSyncTask.stop();
-    scheduledSyncTask = null;
+  isSchedulerRunning = false;
+  if (schedulerTimeout) {
+    clearTimeout(schedulerTimeout);
+    schedulerTimeout = null;
   }
-  
   console.log('[Scheduler] Scheduler service stopped');
+}
+
+/**
+ * Internal recursive loop function
+ */
+async function scheduleNextLoop(delay: number) {
+  if (schedulerTimeout) clearTimeout(schedulerTimeout);
+  
+  schedulerTimeout = setTimeout(async () => {
+    if (!isSchedulerRunning) return;
+
+    try {
+      // 1. Check dynamic config
+      const dynamicEnabled = await configService.get('SYNC_SCHEDULER_ENABLED') === 'true';
+      const dynamicInterval = parseInt(await configService.get('SYNC_INTERVAL_MS'), 10) || 900000;
+
+      if (dynamicEnabled) {
+        console.log('[Scheduler] Starting sync cycle...');
+        await runScheduledSync();
+      } else {
+        console.log('[Scheduler] Sync skipped (disabled in config)');
+      }
+
+      // 2. Schedule next run
+      if (isSchedulerRunning) {
+        scheduleNextLoop(dynamicInterval);
+      }
+    } catch (error) {
+      console.error('[Scheduler] Error in scheduler loop:', error);
+      // Retry after default interval on error
+      if (isSchedulerRunning) {
+        scheduleNextLoop(900000); 
+      }
+    }
+  }, delay);
 }
 
 /**

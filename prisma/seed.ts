@@ -26,9 +26,9 @@ async function main() {
       description: 'Enable background sync scheduler'
     },
     {
-      key: 'SYNC_INTERVAL_MINUTES',
-      value: process.env.SYNC_INTERVAL_MINUTES || '15',
-      description: 'Sync scheduler interval in minutes'
+      key: 'SYNC_INTERVAL_MS',
+      value: process.env.SYNC_INTERVAL_MS || '900000',
+      description: 'Sync scheduler interval in milliseconds'
     },
     {
       key: 'SYNC_DELAY_AFTER_UPDATE',
