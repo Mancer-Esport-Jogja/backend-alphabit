@@ -298,6 +298,56 @@ Set \`filterByReferrer: true\` to only return positions created via Alphabit.
       }
     }
   },
+  '/nuts/trades/sync-all': {
+    post: {
+      summary: 'Sync all users trades to database',
+      description: 'Syncs trades for all users. Requires admin token header.',
+      tags: ['Nuts - Trades (BE Only - Not Used)'],
+      parameters: [
+        {
+          name: 'x-admin-token',
+          in: 'header',
+          required: true,
+          schema: { type: 'string' },
+          description: 'Admin token configured in ADMIN_SYNC_TOKEN'
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'All user trades synced successfully',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: {
+                    type: 'object',
+                    properties: {
+                      usersProcessed: { type: 'number' },
+                      totalSynced: { type: 'number' },
+                      totalCreated: { type: 'number' },
+                      totalUpdated: { type: 'number' },
+                      errors: { type: 'number' }
+                    }
+                  },
+                  message: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        '401': {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+            }
+          }
+        }
+      }
+    }
+  },
   '/nuts/trades': {
     get: {
       summary: 'Get user trades',

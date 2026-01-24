@@ -3,6 +3,7 @@
  */
 import { Request, Response } from 'express';
 import { syncUserTrades, getUserTrades, getUserTradeStats } from '../services/tradeService';
+import { triggerManualSync } from '../services/schedulerService';
 import { ErrorCodes, createErrorResponse } from '../lib/errors';
 import prisma from '../lib/prisma';
 
@@ -152,6 +153,27 @@ export const tradeController = {
       res.status(500).json(createErrorResponse(
         ErrorCodes.FETCH_TRADES_FAILED,
         'Failed to fetch trade statistics'
+      ));
+    }
+  },
+
+  /**
+   * POST /nuts/trades/sync-all
+   * Sync trades for all users (admin token required)
+   */
+  syncAllTrades: async (_req: Request, res: Response) => {
+    try {
+      const result = await triggerManualSync();
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: `Synced ${result.totalSynced} trades across ${result.usersProcessed} users`,
+      });
+    } catch (error) {
+      console.error('[TradeController] syncAllTrades error:', error);
+      res.status(500).json(createErrorResponse(
+        ErrorCodes.SYNC_TRADES_FAILED,
+        'Failed to sync all user trades'
       ));
     }
   },

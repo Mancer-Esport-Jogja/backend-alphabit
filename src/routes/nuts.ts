@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { nutsController } from '../controllers/nutsController';
 import { tradeController } from '../controllers/tradeController';
 import { requireAuth } from '../middlewares/auth';
+import { requireAdminToken } from '../middlewares/adminToken';
 
 const router = Router();
 
@@ -27,6 +28,9 @@ router.post('/payout/calculate', nutsController.calculatePayout);
 
 // POST /nuts/trades/sync - Sync user trades from Thetanuts to DB
 router.post('/trades/sync', requireAuth, tradeController.syncTrades);
+
+// POST /nuts/trades/sync-all - Sync all user trades (admin token required)
+router.post('/trades/sync-all', requireAdminToken, tradeController.syncAllTrades);
 
 // GET /nuts/trades - Get user trades from DB
 router.get('/trades', requireAuth, tradeController.getTrades);

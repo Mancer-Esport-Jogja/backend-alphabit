@@ -8,6 +8,11 @@
 
 Backend service for **Alphabit Web3 Mini-App** on Base. Handles Farcaster Quick Auth verification, user management, and provides RESTful API endpoints.
 
+#### Nuts - Trades (Admin)
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/nuts/trades/sync-all` | Sync all users trades to database | x-admin-token |
+
 ---
 
 ## ✨ Features
@@ -174,6 +179,11 @@ http://localhost:3000/api/docs
 | POST | `/api/nuts/trades/sync` | Sync trades to database | ✅ Bearer |
 | GET | `/api/nuts/trades` | Get user trades from DB | ✅ Bearer |
 | GET | `/api/nuts/trades/stats` | Get trade statistics | ✅ Bearer |
+
+#### Nuts - Trades (Admin)
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/nuts/trades/sync-all` | Sync all users trades to database | x-admin-token |
 
 ---
 
@@ -410,6 +420,12 @@ curl http://localhost:3000/api/users/me \
   -H "Authorization: Bearer dev-token"
 ```
 
+**Sync All Trades (Admin):**
+```bash
+curl -X POST http://localhost:3000/api/nuts/trades/sync-all \
+  -H "x-admin-token: your-admin-token"
+```
+
 ---
 
 ## 📄 Environment Variables
@@ -422,8 +438,10 @@ curl http://localhost:3000/api/users/me \
 | `CORS_ORIGIN` | Allowed CORS origins | No | `*` |
 | `DATABASE_URL` | PostgreSQL connection string | Yes | - |
 | `NEYNAR_API_KEY` | Neynar API key for Farcaster profile data | No | - |
+| `ADMIN_SYNC_TOKEN` | Admin token for `/api/nuts/trades/sync-all` | Yes (for admin sync) | - |
 | `SYNC_SCHEDULER_ENABLED` | Enable background scheduler | No | `false` |
-| `SYNC_INTERVAL_MINUTES` | Scheduler interval in minutes | No | `15` |
+| `SYNC_INTERVAL_MS` | Scheduler interval in ms | No | `900000` |
+| `SYNC_DELAY_AFTER_UPDATE` | Delay after indexer update (ms) | No | `10000` |
 
 ---
 
@@ -444,3 +462,4 @@ curl http://localhost:3000/api/users/me \
 ## 📜 License
 
 This project is licensed under the MIT License.
+

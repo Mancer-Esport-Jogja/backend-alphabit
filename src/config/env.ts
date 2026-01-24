@@ -14,6 +14,8 @@ export const env = {
   ALPHABIT_REFERRER_ADDRESS: process.env.ALPHABIT_REFERRER_ADDRESS || '',
   THETANUTS_INDEXER_URL: process.env.THETANUTS_INDEXER_URL || 'https://optionbook-indexer.thetanuts.finance/api/v1',
   THETANUTS_ORDERS_URL: process.env.THETANUTS_ORDERS_URL || 'https://round-snowflake-9c31.devops-118.workers.dev/',
+  // Admin token for internal sync endpoint
+  ADMIN_SYNC_TOKEN: process.env.ADMIN_SYNC_TOKEN || '',
   // Sync Scheduler Config
   SYNC_SCHEDULER_ENABLED: process.env.SYNC_SCHEDULER_ENABLED === 'true', // Default false
   SYNC_INTERVAL_MS: parseInt(process.env.SYNC_INTERVAL_MS || '900000', 10), // Default 15 min (15 * 60 * 1000)
