@@ -53,6 +53,26 @@ export const schemas = {
         type: 'string',
         format: 'date-time',
         description: 'Last activity timestamp'
+      },
+      currentLoginStreak: {
+        type: 'integer',
+        description: 'Current daily login streak count',
+        example: 3
+      },
+      maxLoginStreak: {
+        type: 'integer',
+        description: 'Maximum daily login streak achieved',
+        example: 10
+      },
+      currentWinStreak: {
+        type: 'integer',
+        description: 'Current trading win streak count',
+        example: 2
+      },
+      maxWinStreak: {
+        type: 'integer',
+        description: 'Maximum trading win streak achieved',
+        example: 5
       }
     }
   },

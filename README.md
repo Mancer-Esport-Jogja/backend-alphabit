@@ -141,8 +141,8 @@ http://localhost:3000/api/docs
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
 | GET | `/api/user/analytics/summary` | Get PnL, Win Rate & Stats | ✅ Bearer |
-| GET | `/api/user/analytics/pnl-history` | Get PnL chart data | ✅ Bearer |
-| GET | `/api/user/analytics/distribution` | Get Asset/Strategy breakdown | ✅ Bearer |
+| GET | `/api/user/analytics/pnl-history?period=1d/7d/30d/all` | Get PnL chart data. default: 30d | ✅ Bearer |
+| GET | `/api/user/analytics/distribution?period=1d/7d/30d/all` | Get Asset/Strategy breakdown. default: all | ✅ Bearer |
 
 #### Nuts - Thetanuts Finance (Public)
 | Method | Endpoint | Description | Auth |
