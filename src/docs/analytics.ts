@@ -100,7 +100,7 @@ export const analyticsPaths = {
           name: 'period',
           schema: {
             type: 'string',
-            enum: ['1d', '7d', '30d', 'all'],
+            enum: ['24h', '7d', '30d', 'all'],
             default: '30d'
           },
           description: 'Time period for the history data. Defaults to 30d.'
@@ -125,7 +125,7 @@ export const analyticsPaths = {
                         date: {
                           type: 'string',
                           format: 'date',
-                          description: 'Date of the data point (YYYY-MM-DD) or (YYYY-MM-DD HH:00) for 1d period',
+                          description: 'Date of the data point (YYYY-MM-DD) or (YYYY-MM-DD HH:00) for 24h period',
                           example: '2023-10-01'
                         },
                         pnl: {
@@ -177,7 +177,7 @@ export const analyticsPaths = {
            name: 'period',
            schema: {
              type: 'string',
-             enum: ['1d', '7d', '30d', 'all'],
+             enum: ['24h', '7d', '30d', 'all'],
              default: 'all'
            },
            description: 'Optional time period to filter data. Assets/Strategies filtered by Entry Time, Results filtered by Settlement Time.'

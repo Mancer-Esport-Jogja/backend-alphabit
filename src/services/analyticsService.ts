@@ -101,9 +101,9 @@ export const analyticsService = {
   /**
    * Get PnL History for Time Series Chart
    */
-  getPnLHistory: async (userId: string, period: '1d' | '7d' | '30d' | 'all' = '30d') => {
+  getPnLHistory: async (userId: string, period: '24h' | '7d' | '30d' | 'all' = '30d') => {
     let dateFilter = new Date();
-    if (period === '1d') dateFilter.setDate(dateFilter.getDate() - 1);
+    if (period === '24h') dateFilter.setDate(dateFilter.getDate() - 1);
     if (period === '7d') dateFilter.setDate(dateFilter.getDate() - 7);
     if (period === '30d') dateFilter.setDate(dateFilter.getDate() - 30);
     if (period === 'all') dateFilter = new Date(0); // Epoch
@@ -134,7 +134,7 @@ export const analyticsService = {
       let timeKey: string;
       const date = trade.closeTimestamp;
       
-      if (period === '1d') {
+      if (period === '24h') {
         // Round down to hour
         date.setMinutes(0, 0, 0); 
         // Need to be careful with timezone, sticking to ISO string basics or UTC
@@ -164,7 +164,7 @@ export const analyticsService = {
     let startDate = new Date(now);
     let intervalMs = 24 * 60 * 60 * 1000; // 1 Day
 
-    if (period === '1d') {
+    if (period === '24h') {
       startDate.setDate(startDate.getDate() - 1);
       intervalMs = 60 * 60 * 1000; // 1 Hour
       // Align start to top of hour
@@ -192,7 +192,7 @@ export const analyticsService = {
 
     while (current < end) {
       let timeKey: string;
-      if (period === '1d') {
+      if (period === '24h') {
          timeKey = `${current.toISOString().split('T')[0]} ${String(current.getUTCHours()).padStart(2, '0')}:00`;
       } else {
          timeKey = current.toISOString().split('T')[0];
@@ -216,7 +216,7 @@ export const analyticsService = {
   /**
    * Get Distribution Data (Pie/Donut Charts)
    */
-  getDistribution: async (userId: string, period?: '1d' | '7d' | '30d' | 'all') => {
+  getDistribution: async (userId: string, period?: '24h' | '7d' | '30d' | 'all') => {
     let entryDateFilter: Date | undefined;
     let closeDateFilter: Date | undefined;
 
@@ -226,7 +226,7 @@ export const analyticsService = {
       closeDateFilter = new Date(now);
 
       let days = 30;
-      if (period === '1d') days = 1;
+      if (period === '24h') days = 1;
       if (period === '7d') days = 7;
       
       entryDateFilter.setDate(now.getDate() - days);

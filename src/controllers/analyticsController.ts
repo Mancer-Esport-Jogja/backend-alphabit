@@ -49,7 +49,9 @@ export const analyticsController = {
         return;
       }
 
-      const period = (req.query.period as '7d' | '30d' | 'all') || '30d';
+      const rawPeriod = req.query.period as string | undefined;
+      const normalizedPeriod = rawPeriod === '1d' ? '24h' : rawPeriod;
+      const period = (normalizedPeriod as '24h' | '7d' | '30d' | 'all') || '30d';
       const data = await analyticsService.getPnLHistory(user.id, period);
 
       res.json({
@@ -78,7 +80,9 @@ export const analyticsController = {
         return;
       }
 
-      const period = (req.query.period as '1d' | '7d' | '30d' | 'all') || 'all';
+      const rawPeriod = req.query.period as string | undefined;
+      const normalizedPeriod = rawPeriod === '1d' ? '24h' : rawPeriod;
+      const period = (normalizedPeriod as '24h' | '7d' | '30d' | 'all') || 'all';
       const data = await analyticsService.getDistribution(user.id, period);
 
       res.json({
