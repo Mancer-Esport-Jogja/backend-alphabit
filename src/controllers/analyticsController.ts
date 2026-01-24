@@ -78,7 +78,7 @@ export const analyticsController = {
         return;
       }
 
-      const period = (req.query.period as '7d' | '30d' | 'all') || 'all';
+      const period = (req.query.period as '1d' | '7d' | '30d' | 'all') || 'all';
       const data = await analyticsService.getDistribution(user.id, period);
 
       res.json({

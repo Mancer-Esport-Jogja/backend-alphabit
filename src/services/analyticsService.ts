@@ -98,8 +98,12 @@ export const analyticsService = {
   /**
    * Get PnL History for Time Series Chart
    */
-  getPnLHistory: async (userId: string, period: '7d' | '30d' | 'all' = '30d') => {
+  /**
+   * Get PnL History for Time Series Chart
+   */
+  getPnLHistory: async (userId: string, period: '1d' | '7d' | '30d' | 'all' = '30d') => {
     let dateFilter = new Date();
+    if (period === '1d') dateFilter.setDate(dateFilter.getDate() - 1);
     if (period === '7d') dateFilter.setDate(dateFilter.getDate() - 7);
     if (period === '30d') dateFilter.setDate(dateFilter.getDate() - 30);
     if (period === 'all') dateFilter = new Date(0); // Epoch
@@ -121,16 +125,26 @@ export const analyticsService = {
       }
     });
 
-    const history: any[] = [];
-    let cumulativePnL = 0;
-
-    // We can aggregate by day in JS
-    const dailyMap = new Map<string, number>();
+    // 2. Aggregate PnL Data
+    const timeMap = new Map<string, number>();
 
     for (const trade of trades) {
       if (!trade.closeTimestamp) continue;
       
-      const dateKey = trade.closeTimestamp.toISOString().split('T')[0]; // YYYY-MM-DD
+      let timeKey: string;
+      const date = trade.closeTimestamp;
+      
+      if (period === '1d') {
+        // Round down to hour
+        date.setMinutes(0, 0, 0); 
+        // Need to be careful with timezone, sticking to ISO string basics or UTC
+        // Simple mock: YYYY-MM-DD HH:00
+        timeKey = `${date.toISOString().split('T')[0]} ${String(date.getUTCHours()).padStart(2, '0')}:00`;
+      } else {
+        // Round to day
+        timeKey = date.toISOString().split('T')[0];
+      }
+
       const decimals = trade.collateralDecimals || 6;
       const divisor = Math.pow(10, decimals);
       
@@ -138,26 +152,71 @@ export const analyticsService = {
       const payout = Number(trade.payoutBuyer || '0') / divisor;
       const tradePnL = payout - premium;
 
-      dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + tradePnL);
+      timeMap.set(timeKey, (timeMap.get(timeKey) || 0) + tradePnL);
     }
 
-    // Convert to array and calculate cumulative
-    for (const [date, pnl] of dailyMap.entries()) {
+    // 3. Generate Continuous Timeline
+    const history: any[] = [];
+    let cumulativePnL = 0;
+    const now = new Date();
+    
+    // Determine start date and interval
+    let startDate = new Date(now);
+    let intervalMs = 24 * 60 * 60 * 1000; // 1 Day
+
+    if (period === '1d') {
+      startDate.setDate(startDate.getDate() - 1);
+      intervalMs = 60 * 60 * 1000; // 1 Hour
+      // Align start to top of hour
+      startDate.setMinutes(0, 0, 0);
+    } else if (period === '7d') {
+      startDate.setDate(startDate.getDate() - 7);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (period === '30d') {
+      startDate.setDate(startDate.getDate() - 30);
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      // 'all' - start from first trade or default 30d if empty
+      if (trades.length > 0 && trades[0].closeTimestamp) {
+         startDate = new Date(trades[0].closeTimestamp);
+         startDate.setHours(0, 0, 0, 0);
+      } else {
+         startDate.setDate(startDate.getDate() - 30); // Fallback
+      }
+    }
+
+    // Loop from Start to Now
+    let current = new Date(startDate);
+    // Add small buffer to include current hour/day
+    const end = new Date(now.getTime() + intervalMs); 
+
+    while (current < end) {
+      let timeKey: string;
+      if (period === '1d') {
+         timeKey = `${current.toISOString().split('T')[0]} ${String(current.getUTCHours()).padStart(2, '0')}:00`;
+      } else {
+         timeKey = current.toISOString().split('T')[0];
+      }
+
+      const pnl = timeMap.get(timeKey) || 0;
       cumulativePnL += pnl;
+
       history.push({
-        date,
+        date: timeKey,
         pnl: parseFloat(pnl.toFixed(2)),
         cumulativePnL: parseFloat(cumulativePnL.toFixed(2))
       });
-    }
 
+      current = new Date(current.getTime() + intervalMs);
+    }
+    
     return history;
   },
 
   /**
    * Get Distribution Data (Pie/Donut Charts)
    */
-  getDistribution: async (userId: string, period?: '7d' | '30d' | 'all') => {
+  getDistribution: async (userId: string, period?: '1d' | '7d' | '30d' | 'all') => {
     let entryDateFilter: Date | undefined;
     let closeDateFilter: Date | undefined;
 
@@ -166,7 +225,10 @@ export const analyticsService = {
       entryDateFilter = new Date(now);
       closeDateFilter = new Date(now);
 
-      const days = period === '7d' ? 7 : 30;
+      let days = 30;
+      if (period === '1d') days = 1;
+      if (period === '7d') days = 7;
+      
       entryDateFilter.setDate(now.getDate() - days);
       closeDateFilter.setDate(now.getDate() - days);
     }

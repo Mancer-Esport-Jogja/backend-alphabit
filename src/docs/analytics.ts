@@ -100,7 +100,7 @@ export const analyticsPaths = {
           name: 'period',
           schema: {
             type: 'string',
-            enum: ['7d', '30d', 'all'],
+            enum: ['1d', '7d', '30d', 'all'],
             default: '30d'
           },
           description: 'Time period for the history data. Defaults to 30d.'
@@ -125,7 +125,7 @@ export const analyticsPaths = {
                         date: {
                           type: 'string',
                           format: 'date',
-                          description: 'Date of the data point (YYYY-MM-DD)',
+                          description: 'Date of the data point (YYYY-MM-DD) or (YYYY-MM-DD HH:00) for 1d period',
                           example: '2023-10-01'
                         },
                         pnl: {
@@ -142,6 +142,15 @@ export const analyticsPaths = {
                     }
                   }
                 }
+              },
+              example: {
+                success: true,
+                data: [
+                   { date: '2023-10-25 14:00', pnl: 50.00, cumulativePnl: 50.00 },
+                   { date: '2023-10-25 15:00', pnl: -20.00, cumulativePnl: 30.00 },
+                   { date: '2023-10-25 16:00', pnl: 100.00, cumulativePnl: 130.00 },
+                   { date: '2023-10-25 17:00', pnl: 0, cumulativePnl: 130.00 }
+                ]
               }
             }
           }
@@ -168,7 +177,7 @@ export const analyticsPaths = {
            name: 'period',
            schema: {
              type: 'string',
-             enum: ['7d', '30d', 'all'],
+             enum: ['1d', '7d', '30d', 'all'],
              default: 'all'
            },
            description: 'Optional time period to filter data. Assets/Strategies filtered by Entry Time, Results filtered by Settlement Time.'
@@ -224,6 +233,24 @@ export const analyticsPaths = {
                       }
                     }
                   }
+                }
+              },
+              example: {
+                success: true,
+                data: {
+                  assets: [
+                    { label: 'BTC', count: 12, volume: '15000.00' },
+                    { label: 'ETH', count: 8, volume: '8000.00' }
+                  ],
+                  results: [
+                    { label: 'Win', count: 15 },
+                    { label: 'Loss', count: 4 },
+                    { label: 'Expired', count: 1 }
+                  ],
+                  strategies: [
+                    { label: 'CALL_SPREAD', count: 10 },
+                    { label: 'PUT_SPREAD', count: 10 }
+                  ]
                 }
               }
             }
