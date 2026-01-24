@@ -150,7 +150,7 @@ function mapPositionToTradeActivity(userId: string, position: ThetanutsPosition)
     // Explicit close - use Prisma.JsonNull for null JSON values
     explicitClose: position.explicitClose 
       ? (position.explicitClose as Prisma.InputJsonValue)
-      : Prisma.JsonNull,
+      : Prisma.DbNull,
   };
 }
 
@@ -247,11 +247,51 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
     }
   }
 
+  // Recalculate Win Streak (UTC-based logic not needed for win streak as it is event based)
+  await updateWinStreakForUser(userId);
+
   return {
     synced: positionsToSync.length,
     created,
     updated,
   };
+}
+
+/**
+ * Recalculate and update Win Streak for a user
+ */
+async function updateWinStreakForUser(userId: string) {
+  // Fetch all settled trades sorted by time
+  const settledTrades = await prisma.tradeActivity.findMany({
+    where: { 
+      userId,
+      status: 'SETTLED'
+    },
+    orderBy: { entryTimestamp: 'asc' }, // Oldest first
+    select: { payoutBuyer: true }
+  });
+
+  let currentStreak = 0;
+  let maxStreak = 0;
+
+  for (const trade of settledTrades) {
+    const payout = parseFloat(trade.payoutBuyer || '0');
+    if (payout > 0) {
+      currentStreak++;
+      maxStreak = Math.max(maxStreak, currentStreak);
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  // Update user stats
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      currentWinStreak: currentStreak,
+      maxWinStreak: maxStreak
+    }
+  });
 }
 
 /**

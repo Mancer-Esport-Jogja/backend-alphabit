@@ -47,16 +47,57 @@ export const authController = {
         });
         isNewUser = true;
       } else {
+        // Calculate Streak (UTC Midnight)
+        const now = new Date();
+        const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        
+        let newStreak = user.currentLoginStreak;
+        let lastLoginDateToUpdate = user.lastLoginDate;
+        
+        if (!user.lastLoginDate) {
+           // First time tracking streak
+           newStreak = 1;
+           lastLoginDateToUpdate = todayUtc;
+        } else {
+           // Compare UTC dates (ignoring time)
+           const lastLoginUtc = new Date(Date.UTC(
+             user.lastLoginDate.getUTCFullYear(), 
+             user.lastLoginDate.getUTCMonth(), 
+             user.lastLoginDate.getUTCDate()
+           ));
+           
+           const diffTime = todayUtc.getTime() - lastLoginUtc.getTime();
+           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+           
+           if (diffDays === 1) {
+             // Consecutive day
+             newStreak++;
+             lastLoginDateToUpdate = todayUtc;
+           } else if (diffDays > 1) {
+             // Missed a day (or more)
+             newStreak = 1;
+             lastLoginDateToUpdate = todayUtc;
+           }
+           // if 0, same day, do nothing to streak
+        }
+
         // Update existing user
+        const maxStreak = Math.max(newStreak, user.maxLoginStreak);
+
         user = await prisma.user.update({
           where: { id: user.id },
           data: { 
             lastActiveAt: new Date(),
+            
+            // Streak updates
+            currentLoginStreak: newStreak,
+            maxLoginStreak: maxStreak,
+            lastLoginDate: lastLoginDateToUpdate,
+
             // Update profile data from Neynar (always refresh)
             username: profileData.username || user.username,
             displayName: profileData.displayName || user.displayName,
             pfpUrl: profileData.pfpUrl || user.pfpUrl,
-            // primaryEthAddress: profileData.primaryEthAddress || user.primaryEthAddress
           }
         });
       }
@@ -73,7 +114,11 @@ export const authController = {
             primaryEthAddress: user.primaryEthAddress,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            lastActiveAt: user.lastActiveAt
+            lastActiveAt: user.lastActiveAt,
+            currentLoginStreak: user.currentLoginStreak,
+            maxLoginStreak: user.maxLoginStreak,
+            currentWinStreak: user.currentWinStreak,
+            maxWinStreak: user.maxWinStreak
           },
           isNewUser
         }

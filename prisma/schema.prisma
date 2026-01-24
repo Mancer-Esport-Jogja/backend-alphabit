@@ -27,6 +27,15 @@ model User {
   updatedAt          DateTime @updatedAt @map("updated_at")
   lastActiveAt       DateTime @default(now()) @map("last_active_at")
 
+  // Login Streak
+  currentLoginStreak Int      @default(0) @map("current_login_streak")
+  maxLoginStreak     Int      @default(0) @map("max_login_streak")
+  lastLoginDate      DateTime? @map("last_login_date")
+
+  // Win Streak
+  currentWinStreak   Int      @default(0) @map("current_win_streak")
+  maxWinStreak       Int      @default(0) @map("max_win_streak")
+
   // Relations
   trades             TradeActivity[]
 

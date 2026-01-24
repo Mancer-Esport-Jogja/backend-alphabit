@@ -43,7 +43,11 @@ export const userController = {
             primaryEthAddress: user.primaryEthAddress,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            lastActiveAt: user.lastActiveAt
+            lastActiveAt: user.lastActiveAt,
+            currentLoginStreak: user.currentLoginStreak,
+            maxLoginStreak: user.maxLoginStreak,
+            currentWinStreak: user.currentWinStreak,
+            maxWinStreak: user.maxWinStreak
           }
         }
       });

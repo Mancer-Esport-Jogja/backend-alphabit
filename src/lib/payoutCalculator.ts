@@ -90,10 +90,11 @@ export function calculatePayoutAtPrice(
 export function getOptionTypeLabel(strikesCount: number, isCall: boolean): string {
   const direction = isCall ? 'CALL' : 'PUT';
   switch (strikesCount) {
+    case 1: return `${direction}_BASIC`;
     case 2: return `${direction}_SPREAD`;
     case 3: return `${direction}_BUTTERFLY`;
     case 4: return `${direction}_CONDOR`;
-    default: return 'UNKNOWN';
+    default: return `UNKNOWN_${strikesCount}`;
   }
 }
 
