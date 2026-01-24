@@ -157,16 +157,44 @@ export const analyticsService = {
   /**
    * Get Distribution Data (Pie/Donut Charts)
    */
-  getDistribution: async (userId: string) => {
-    const trades = await prisma.tradeActivity.findMany({
-      where: { userId },
+  getDistribution: async (userId: string, period?: '7d' | '30d' | 'all') => {
+    let entryDateFilter: Date | undefined;
+    let closeDateFilter: Date | undefined;
+
+    if (period && period !== 'all') {
+      const now = new Date();
+      entryDateFilter = new Date(now);
+      closeDateFilter = new Date(now);
+
+      const days = period === '7d' ? 7 : 30;
+      entryDateFilter.setDate(now.getDate() - days);
+      closeDateFilter.setDate(now.getDate() - days);
+    }
+
+    // 1. Fetch trades for Assets & Strategies (based on Entry Time)
+    const entryTrades = await prisma.tradeActivity.findMany({
+      where: { 
+        userId,
+        ...(entryDateFilter && { entryTimestamp: { gte: entryDateFilter } })
+      },
       select: {
         underlyingAsset: true,
-        status: true,
-        payoutBuyer: true,
         optionType: true,
         collateralAmount: true,
         collateralDecimals: true
+      }
+    });
+
+    // 2. Fetch trades for Results (Win/Loss) - based on Settlement Time
+    const resultTrades = await prisma.tradeActivity.findMany({
+      where: { 
+        userId,
+        status: { in: ['SETTLED', 'EXPIRED'] }, // Results only make sense for closed trades
+        ...(closeDateFilter && { closeTimestamp: { gte: closeDateFilter } })
+      },
+      select: {
+        status: true,
+        payoutBuyer: true
       }
     });
 
@@ -174,8 +202,9 @@ export const analyticsService = {
     const strategyMap = new Map<string, number>();
     const resultMap = { 'Win': 0, 'Loss': 0, 'Expired': 0 };
 
-    for (const trade of trades) {
-      // 1. Assets
+    // Process Assets & Strategies (Entry filtered)
+    for (const trade of entryTrades) {
+      // Assets
       const decimals = trade.collateralDecimals || 6;
       const divisor = Math.pow(10, decimals);
       const volume = Number(trade.collateralAmount) / divisor;
@@ -185,12 +214,14 @@ export const analyticsService = {
       assetStat.volume += volume;
       assetMap.set(trade.underlyingAsset, assetStat);
 
-      // 2. Strategies
-      if (trade.optionType) { // optionType is string (LABEL)
+      // Strategies
+      if (trade.optionType) {
         strategyMap.set(trade.optionType, (strategyMap.get(trade.optionType) || 0) + 1);
       }
+    }
 
-      // 3. Results
+    // Process Results (Close filtered)
+    for (const trade of resultTrades) {
       if (trade.status === 'EXPIRED') {
         resultMap['Expired']++;
       } else if (trade.status === 'SETTLED') {
@@ -198,7 +229,6 @@ export const analyticsService = {
          if (payout > 0) resultMap['Win']++;
          else resultMap['Loss']++;
       }
-      // 'OPEN' ignored for Win/Loss/Expired pie chart usually, or separated
     }
 
     return {
