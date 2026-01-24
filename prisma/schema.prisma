@@ -47,51 +47,53 @@ model TradeActivity {
   id              String      @id @default(cuid())
   userId          String      @map("user_id")
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Identifiers from Thetanuts
-  optionAddress   String      @map("option_address")
-  txHash          String      @unique @map("tx_hash")
+  optionAddress   String      @map("option_address")      // Deployed option contract
+  txHash          String      @unique @map("tx_hash")     // Entry transaction hash (unique)
   status          TradeStatus @default(OPEN)
-  
-  // Order details
-  underlyingAsset String      @map("underlying_asset")  // "BTC" | "ETH"
-  optionType      String      @map("option_type")       // "CALL_SPREAD" | "PUT_BUTTERFLY" etc
-  isCall          Boolean     @map("is_call")
-  isLong          Boolean     @map("is_long")
-  strikes         Json                                   // Array of strike prices (raw strings)
-  expiryTimestamp DateTime    @map("expiry_timestamp")
-  
-  // Parties
-  buyer           String
-  seller          String
-  referrer        String?
-  
-  // Financial data (stored as strings to preserve precision)
-  collateralToken   String    @map("collateral_token")
-  collateralSymbol  String    @map("collateral_symbol")
-  collateralDecimals Int      @map("collateral_decimals")
-  entryPremium      String    @map("entry_premium")
-  entryFeePaid      String    @map("entry_fee_paid")
-  numContracts      String    @map("num_contracts")
-  collateralAmount  String    @map("collateral_amount")
-  
-  // Settlement data (only for settled trades)
-  settlementPrice   String?   @map("settlement_price")
-  payoutBuyer       String?   @map("payout_buyer")
-  payoutSeller      String?   @map("payout_seller")
-  
-  // Timestamps
-  entryTimestamp    DateTime  @map("entry_timestamp")
+  underlyingAsset   String    @map("underlying_asset")    // "BTC" | "ETH"
+  optionType        String    @map("option_type")         // "CALL_SPREAD" | "PUT_BUTTERFLY" etc (derived)
+  optionTypeRaw     Int       @map("option_type_raw")     // Raw bitmask from API (256, 257, etc)
+  isCall            Boolean   @map("is_call")             // Derived from optionTypeRaw (bit 0)
+  isLong            Boolean   @map("is_long")             // Derived from optionTypeRaw (bit 8)
+  strikes           Json                                   // Array of strike prices
+  expiryTimestamp   DateTime  @map("expiry_timestamp")    // When option expires
+  buyer             String                                 // Buyer wallet address
+  seller            String                                 // Seller wallet address (market maker)
+  referrer          String?                                // Referrer address (Alphabit's address)
+  createdBy         String?   @map("created_by")          // Factory contract that created option
+  collateralToken     String  @map("collateral_token")    // USDC contract address
+  collateralSymbol    String  @map("collateral_symbol")   // "USDC"
+  collateralDecimals  Int     @map("collateral_decimals") // 6 for USDC
+  priceFeed           String? @map("price_feed")          // Oracle contract address
+  entryPremium      String    @map("entry_premium")       // Premium paid by buyer
+  entryFeePaid      String    @map("entry_fee_paid")      // Protocol fee paid
+  numContracts      String    @map("num_contracts")       // Number of contracts
+  collateralAmount  String    @map("collateral_amount")   // Total collateral locked
+  entryTimestamp    DateTime  @map("entry_timestamp")     // When trade was made
+  entryBlock        Int?      @map("entry_block")         // Block number of entry tx
+  settlementPrice           String?   @map("settlement_price")            // Oracle price at expiry
+  payoutBuyer               String?   @map("payout_buyer")                // Amount paid to buyer (if ITM)
+  collateralReturnedSeller  String?   @map("collateral_returned_seller")  // Amount returned to seller
+  exercised                 Boolean?  @map("exercised")                   // Was option exercised?
+  closeTimestamp    DateTime? @map("close_timestamp")     // When position was closed/settled
+  closeTxHash       String?   @map("close_tx_hash")       // Settlement transaction hash
+  closeBlock        Int?      @map("close_block")         // Block number of close tx
+  oracleFailure       Boolean?  @map("oracle_failure") @default(false)
+  oracleFailureReason String?   @map("oracle_failure_reason")
+  explicitClose     Json?     @map("explicit_close")      // Raw data if manually closed
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
-  settledAt         DateTime? @map("settled_at")
   
-  @@index([userId, createdAt])
-  @@index([userId, status])
-  @@index([status])
-  @@index([optionAddress])
-  @@index([txHash])
-  @@index([referrer])
+
+  @@index([userId, createdAt(sort: Desc)])          // User's trade history
+  @@index([userId, status])                         // User's open/settled positions
+  @@index([status, expiryTimestamp])                // Expiry monitoring
+  @@index([optionAddress])                          // Lookup by option contract
+  @@index([txHash])                                 // Lookup by entry tx
+  @@index([closeTxHash])                            // Lookup by close tx
+  @@index([referrer])                               // Referrer analytics
+  @@index([underlyingAsset, status])                // BTC/ETH position filtering
+  
   @@map("trade_activities")
 }
 

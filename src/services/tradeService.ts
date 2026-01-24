@@ -2,36 +2,59 @@
  * Trade Service - Handles syncing and fetching trade activities
  */
 import prisma from '../lib/prisma';
+import { Prisma } from '../generated/prisma/client';
 import { env } from '../config/env';
 import { getOptionTypeLabel } from '../lib/payoutCalculator';
 
-// Thetanuts API position type
+// Thetanuts API position type - Complete mapping from API response
 interface ThetanutsPosition {
   address: string;
-  status: string;
+  status: string;                     // "open" | "settled"
   buyer: string;
   seller: string;
-  referrer: string;
+  referrer: string | null;
   createdBy: string;
+  
+  // Entry transaction info
   entryTimestamp: number;
   entryTxHash: string;
+  entryBlock: number;
   entryPremium: string;
   entryFeePaid: string;
+  
+  // Close transaction info (only for settled)
+  closeTimestamp: number | null;
+  closeTxHash: string | null;
+  closeBlock: number | null;
+  
+  // Collateral info
   collateralToken: string;
   collateralSymbol: string;
   collateralDecimals: number;
+  
+  // Option details
   underlyingAsset: string;
   priceFeed: string;
   strikes: string[];
   expiryTimestamp: number;
   numContracts: string;
   collateralAmount: string;
-  optionType: number;
+  optionType: number;                 // Raw bitmask (optionTypeRaw)
+  
+  // Settlement data (null for open positions)
   settlement: {
     settlementPrice: string;
-    payoutBuyer: string;
-    payoutSeller: string;
+    payoutBuyer: string | null;
+    collateralReturnedSeller: string | null;
+    exercised: boolean | null;
+    deliveryAmount: string | null;
+    deliveryCollateral: string | null;
+    explicitDecision: string | null;
+    oracleFailure: boolean | null;
+    oracleFailureReason: string | null;
   } | null;
+  
+  // Explicit close data (for early/manual close)
   explicitClose: unknown | null;
 }
 
@@ -70,31 +93,64 @@ function mapPositionToTradeActivity(userId: string, position: ThetanutsPosition)
 
   return {
     userId,
+    
+    // Identifiers
     optionAddress: position.address,
     txHash: position.entryTxHash,
     status,
+    
+    // Option details
     underlyingAsset: position.underlyingAsset,
     optionType,
+    optionTypeRaw: position.optionType,
     isCall,
     isLong,
     strikes: position.strikes,
     expiryTimestamp: new Date(position.expiryTimestamp * 1000),
+    
+    // Parties
     buyer: position.buyer,
     seller: position.seller,
     referrer: position.referrer || null,
+    createdBy: position.createdBy || null,
+    
+    // Collateral & Oracle
     collateralToken: position.collateralToken,
     collateralSymbol: position.collateralSymbol,
     collateralDecimals: position.collateralDecimals,
+    priceFeed: position.priceFeed || null,
+    
+    // Entry financials
     entryPremium: position.entryPremium,
     entryFeePaid: position.entryFeePaid,
     numContracts: position.numContracts,
     collateralAmount: position.collateralAmount,
+    
+    // Entry transaction
     entryTimestamp: new Date(position.entryTimestamp * 1000),
+    entryBlock: position.entryBlock || null,
+    
     // Settlement data
     settlementPrice: position.settlement?.settlementPrice || null,
     payoutBuyer: position.settlement?.payoutBuyer || null,
-    payoutSeller: position.settlement?.payoutSeller || null,
-    settledAt: position.settlement ? new Date() : null,
+    collateralReturnedSeller: position.settlement?.collateralReturnedSeller || null,
+    exercised: position.settlement?.exercised ?? null,
+    
+    // Close transaction
+    closeTimestamp: position.closeTimestamp 
+      ? new Date(position.closeTimestamp * 1000) 
+      : null,
+    closeTxHash: position.closeTxHash || null,
+    closeBlock: position.closeBlock || null,
+    
+    // Oracle failure tracking
+    oracleFailure: position.settlement?.oracleFailure ?? false,
+    oracleFailureReason: position.settlement?.oracleFailureReason || null,
+    
+    // Explicit close - use Prisma.JsonNull for null JSON values
+    explicitClose: position.explicitClose 
+      ? (position.explicitClose as Prisma.InputJsonValue)
+      : Prisma.JsonNull,
   };
 }
 
@@ -160,11 +216,26 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
       await prisma.tradeActivity.update({
         where: { txHash: position.entryTxHash },
         data: {
+          // Status can change from OPEN → SETTLED/EXPIRED
           status: data.status,
+          
+          // Settlement data (populated when settled)
           settlementPrice: data.settlementPrice,
           payoutBuyer: data.payoutBuyer,
-          payoutSeller: data.payoutSeller,
-          settledAt: data.settledAt,
+          collateralReturnedSeller: data.collateralReturnedSeller,
+          exercised: data.exercised,
+          
+          // Close transaction (populated when settled)
+          closeTimestamp: data.closeTimestamp,
+          closeTxHash: data.closeTxHash,
+          closeBlock: data.closeBlock,
+          
+          // Oracle failure tracking
+          oracleFailure: data.oracleFailure,
+          oracleFailureReason: data.oracleFailureReason,
+          
+          // Explicit close
+          explicitClose: data.explicitClose,
         },
       });
       updated++;
