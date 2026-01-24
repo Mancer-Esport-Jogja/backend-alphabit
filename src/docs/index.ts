@@ -11,3 +11,4 @@ export * from './users';
 export * from './system';
 export * from './nuts';
 export * from './analytics';
+export * from './leaderboard';

@@ -5,6 +5,7 @@ import prisma from '../lib/prisma';
 import { Prisma } from '../generated/prisma/client';
 import { env } from '../config/env';
 import { getOptionTypeLabel } from '../lib/payoutCalculator';
+import { statsService } from './statsService';
 
 // Thetanuts API position type - Complete mapping from API response
 interface ThetanutsPosition {
@@ -151,7 +152,53 @@ function mapPositionToTradeActivity(userId: string, position: ThetanutsPosition)
     explicitClose: position.explicitClose 
       ? (position.explicitClose as Prisma.InputJsonValue)
       : Prisma.DbNull,
+      
+    // Analytics Data (Computed)
+    pnl: calculatePnL(position),
+    roiPercent: calculateRoi(position),
+    normalizedVolume: calculateVolume(position),
   };
+}
+
+/**
+ * Calculate PnL in USD
+ */
+function calculatePnL(position: ThetanutsPosition): number | null {
+  if (position.status !== 'settled' || !position.settlement?.payoutBuyer) return null;
+  
+  const decimals = position.collateralDecimals || 6;
+  const divisor = Math.pow(10, decimals);
+  
+  const premium = Number(position.entryPremium) / divisor;
+  const payout = Number(position.settlement.payoutBuyer) / divisor;
+  
+  return payout - premium;
+}
+
+/**
+ * Calculate ROI in %
+ */
+function calculateRoi(position: ThetanutsPosition): number | null {
+  if (position.status !== 'settled' || !position.settlement?.payoutBuyer) return null;
+  
+  const decimals = position.collateralDecimals || 6;
+  const divisor = Math.pow(10, decimals);
+  
+  const premium = Number(position.entryPremium) / divisor;
+  const payout = Number(position.settlement.payoutBuyer) / divisor;
+  
+  if (premium === 0) return 0;
+  
+  return ((payout - premium) / premium) * 100;
+}
+
+/**
+ * Calculate Normalized Volume (Collateral Amount)
+ */
+function calculateVolume(position: ThetanutsPosition): number {
+  const decimals = position.collateralDecimals || 6;
+  const divisor = Math.pow(10, decimals);
+  return Number(position.collateralAmount) / divisor;
 }
 
 /**
@@ -236,6 +283,11 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
           
           // Explicit close
           explicitClose: data.explicitClose,
+
+          // Analytics Data
+          pnl: data.pnl,
+          roiPercent: data.roiPercent,
+          normalizedVolume: data.normalizedVolume,
         },
       });
       updated++;
@@ -249,6 +301,13 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
 
   // Recalculate Win Streak (UTC-based logic not needed for win streak as it is event based)
   await updateWinStreakForUser(userId);
+
+  // Recalculate User Stats (Leaderboard - Option B)
+  // This is the "Event-Driven" trigger with "Self-Correction" (Full Recalculation)
+  if (created > 0 || updated > 0) {
+    await statsService.recalculateUserDailyStats(userId);
+    await statsService.recalculateUserStats(userId);
+  }
 
   return {
     synced: positionsToSync.length,

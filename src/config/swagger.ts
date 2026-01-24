@@ -1,4 +1,4 @@
-import { schemas, authPaths, usersPaths, systemPaths, nutsPaths, analyticsPaths } from '../docs';
+import { schemas, authPaths, usersPaths, systemPaths, nutsPaths, analyticsPaths, leaderboardPaths } from '../docs';
 
 /**
  * Swagger/OpenAPI Configuration
@@ -58,6 +58,10 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
       description: 'User trading analytics and statistics'
     },
     {
+      name: 'Leaderboard',
+      description: 'Leaderboard built from bucketed daily stats (event-driven rollups)'
+    },
+    {
       name: 'System',
       description: 'System information and health checks'
     }
@@ -78,6 +82,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
     ...usersPaths,
     ...nutsPaths,
     ...analyticsPaths,
+    ...leaderboardPaths,
     ...systemPaths
   }
 };

@@ -12,6 +12,15 @@ Backend service for **Alphabit Web3 Mini-App** on Base. Handles Farcaster Quick 
 
 ## ✨ Features
 
+- Authentication - Farcaster Quick Auth JWT verification
+- Database - PostgreSQL with Prisma ORM (v7.2)
+- API Docs - Interactive Swagger UI (development only)
+- Architecture - Modular Controller-Service-Route pattern
+- Leaderboard - Event-driven daily buckets for 24h/7d/30d/all (self-correcting rollups)
+- Security - Helmet headers + CORS protection
+- Logging - Request logging via Morgan
+- Docker - Container-ready deployment
+
 - 🔐 **Authentication** - Farcaster Quick Auth JWT verification
 - 🗃️ **Database** - PostgreSQL with Prisma ORM (v7.2)
 - 📚 **API Docs** - Interactive Swagger UI (development only)
@@ -143,6 +152,11 @@ http://localhost:3000/api/docs
 | GET | `/api/user/analytics/summary` | Get PnL, Win Rate & Stats | ✅ Bearer |
 | GET | `/api/user/analytics/pnl-history?period=1d/7d/30d/all` | Get PnL chart data. default: 30d | ✅ Bearer |
 | GET | `/api/user/analytics/distribution?period=1d/7d/30d/all` | Get Asset/Strategy breakdown. default: all | ✅ Bearer |
+
+#### Leaderboard
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | /api/leaderboard?period=24h/7d/30d/all&sortBy=pnl\|roi\|volume\|win_rate&limit=10&page=1 | Bucketed daily rollup leaderboard (event-driven, self-correcting). Defaults: period=all, sortBy=pnl, limit=10, page=1. | ❌ |
 
 #### Nuts - Thetanuts Finance (Public)
 | Method | Endpoint | Description | Auth |

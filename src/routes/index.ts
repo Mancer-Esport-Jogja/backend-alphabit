@@ -6,6 +6,7 @@ import nutsRoutes from './nuts';
 import marketRoutes from './market';
 
 import analyticsRoutes from './analytics';
+import leaderboardRoutes from './leaderboard';
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use('/system', systemRoutes);
 router.use('/nuts', nutsRoutes);
 router.use('/market', marketRoutes);
 router.use('/user/analytics', analyticsRoutes);
+router.use('/leaderboard', leaderboardRoutes);
 
 export default router;

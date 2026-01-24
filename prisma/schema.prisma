@@ -38,10 +38,62 @@ model User {
 
   // Relations
   trades             TradeActivity[]
+  userDailyStats     UserDailyStats[]
 
   @@index([fid])
   @@index([primaryEthAddress])
   @@map("users")
+  userStats          UserStats[]
+}
+
+// Option B: Persistent User Stats for Leaderboard
+model UserStats {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period          String    @db.VarChar(16)
+  
+  // Aggregated Stats (Decimal for accuracy)
+  totalPnl        Decimal   @default(0) @db.Decimal(20, 8)
+  totalRoiPercent Decimal   @default(0) @db.Decimal(10, 2)
+  totalVolume     Decimal   @default(0) @db.Decimal(20, 8)
+  totalTrades     Int       @default(0)
+  winCount        Int       @default(0)
+  winRate         Decimal   @default(0) @db.Decimal(5, 2)
+  
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, period])
+  @@index([period, totalPnl(sort: Desc)])
+  @@index([period, totalRoiPercent(sort: Desc)])
+  @@index([period, totalVolume(sort: Desc)])
+  @@index([period, winRate(sort: Desc)])
+
+  @@map("user_stats")
+}
+
+// Bucketed daily stats to support rolling leaderboards without cache
+model UserDailyStats {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateUtc         DateTime  @map("date_utc")
+
+  totalPnl        Decimal   @default(0) @db.Decimal(20, 8)
+  totalRoiPercent Decimal   @default(0) @db.Decimal(10, 2)
+  totalVolume     Decimal   @default(0) @db.Decimal(20, 8)
+  totalTrades     Int       @default(0)
+  winCount        Int       @default(0)
+  winRate         Decimal   @default(0) @db.Decimal(5, 2)
+
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, dateUtc])
+  @@index([userId, dateUtc])
+  @@index([dateUtc])
+  @@index([dateUtc, totalPnl(sort: Desc)])
+
+  @@map("user_daily_stats")
 }
 
 /// Trade status enum
@@ -94,6 +146,11 @@ model TradeActivity {
   updatedAt         DateTime  @updatedAt @map("updated_at")
   
 
+  // Analytics Data (Decimal fields for calculation/sorting)
+  pnl             Decimal?  @db.Decimal(20, 8) // Profit/Loss in USD (payout - premium)
+  roiPercent      Decimal?  @db.Decimal(10, 2) // ROI in % ((payout - premium) / premium * 100)
+  normalizedVolume Decimal? @db.Decimal(20, 8) // Collateral amount as number
+  
   @@index([userId, createdAt(sort: Desc)])          // User's trade history
   @@index([userId, status])                         // User's open/settled positions
   @@index([status, expiryTimestamp])                // Expiry monitoring
@@ -104,6 +161,9 @@ model TradeActivity {
   @@index([underlyingAsset, status])                // BTC/ETH position filtering
   @@index([userId, closeTimestamp])                 // PnL history filtering
   @@index([userId, entryTimestamp])                 // Distribution filtering
+  @@index([userId, pnl])                            // Leaderboard sorting
+  @@index([userId, roiPercent])                     // Leaderboard sorting
+  @@index([userId, normalizedVolume])               // Leaderboard sorting (Volume)
   
   @@map("trade_activities")
 }
