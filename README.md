@@ -137,6 +137,13 @@ http://localhost:3000/api/docs
 | GET | `/api/system/health` | Health check | ❌ |
 | GET | `/api/health` | Root health check | ❌ |
 
+#### Analytics (Protected)
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/user/analytics/summary` | Get PnL, Win Rate & Stats | ✅ Bearer |
+| GET | `/api/user/analytics/pnl-history` | Get PnL chart data | ✅ Bearer |
+| GET | `/api/user/analytics/distribution` | Get Asset/Strategy breakdown | ✅ Bearer |
+
 #### Nuts - Thetanuts Finance (Public)
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|

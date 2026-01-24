@@ -1,4 +1,4 @@
-import { schemas, authPaths, usersPaths, systemPaths, nutsPaths } from '../docs';
+import { schemas, authPaths, usersPaths, systemPaths, nutsPaths, analyticsPaths } from '../docs';
 
 /**
  * Swagger/OpenAPI Configuration
@@ -8,6 +8,7 @@ import { schemas, authPaths, usersPaths, systemPaths, nutsPaths } from '../docs'
  * - auth.ts      : Auth endpoints documentation
  * - users.ts     : Users endpoints documentation  
  * - system.ts    : System endpoints documentation
+ * - analytics.ts : Analytics endpoints documentation
  */
 export const swaggerSpec = {
   openapi: '3.0.0',
@@ -53,6 +54,10 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
       description: 'Thetanuts Finance integration (orders and positions)'
     },
     {
+      name: 'Analytics',
+      description: 'User trading analytics and statistics'
+    },
+    {
       name: 'System',
       description: 'System information and health checks'
     }
@@ -72,6 +77,7 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
     ...authPaths,
     ...usersPaths,
     ...nutsPaths,
+    ...analyticsPaths,
     ...systemPaths
   }
 };

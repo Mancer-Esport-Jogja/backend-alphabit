@@ -262,7 +262,7 @@ Set \`filterByReferrer: true\` to only return positions created via Alphabit.
     post: {
       summary: 'Sync trades to database',
       description: 'Syncs user trades from Thetanuts to local database. Requires authentication.',
-      tags: ['Nuts - Trades'],
+      tags: ['Nuts - Trades (BE Only - Not Used)'],
       security: [{ bearerAuth: [] }],
       responses: {
         '200': {
@@ -302,7 +302,7 @@ Set \`filterByReferrer: true\` to only return positions created via Alphabit.
     get: {
       summary: 'Get user trades',
       description: 'Get user trades from local database. Requires authentication.',
-      tags: ['Nuts - Trades'],
+      tags: ['Nuts - Trades (BE Only - Not Used)'],
       security: [{ bearerAuth: [] }],
       parameters: [
         {
@@ -363,7 +363,7 @@ Set \`filterByReferrer: true\` to only return positions created via Alphabit.
     get: {
       summary: 'Get trade statistics',
       description: 'Get user trade statistics. Requires authentication.',
-      tags: ['Nuts - Trades'],
+      tags: ['Nuts - Trades (BE Only - Not Used)'],
       security: [{ bearerAuth: [] }],
       responses: {
         '200': {

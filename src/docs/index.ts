@@ -10,3 +10,4 @@ export * from './auth';
 export * from './users';
 export * from './system';
 export * from './nuts';
+export * from './analytics';
