@@ -37,6 +37,16 @@ export const configService = {
     if (key === 'ALPHABIT_REFERRER_ADDRESS') {
       return env.ALPHABIT_REFERRER_ADDRESS || defaultValue;
     }
+    // Scheduler config fallbacks
+    if (key === 'SYNC_SCHEDULER_ENABLED') {
+      return String(env.SYNC_SCHEDULER_ENABLED);
+    }
+    if (key === 'SYNC_INTERVAL_MINUTES') {
+      return String(env.SYNC_INTERVAL_MINUTES);
+    }
+    if (key === 'SYNC_DELAY_AFTER_UPDATE') {
+      return String(env.SYNC_DELAY_AFTER_UPDATE);
+    }
 
     return defaultValue;
   },

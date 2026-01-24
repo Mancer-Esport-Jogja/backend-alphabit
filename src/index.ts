@@ -7,6 +7,7 @@ import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import { initScheduler } from './services/schedulerService';
 
 const app = express();
 
@@ -39,7 +40,11 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(env.PORT, () => {
+// Start server
+app.listen(env.PORT, async () => {
   console.log(`🚀 Server running on port ${env.PORT}`);
   console.log(`📍 Environment: ${env.NODE_ENV}`);
+  
+  // Initialize scheduler
+  await initScheduler();
 });

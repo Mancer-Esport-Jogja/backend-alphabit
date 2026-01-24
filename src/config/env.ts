@@ -14,6 +14,10 @@ export const env = {
   ALPHABIT_REFERRER_ADDRESS: process.env.ALPHABIT_REFERRER_ADDRESS || '',
   THETANUTS_INDEXER_URL: process.env.THETANUTS_INDEXER_URL || 'https://optionbook-indexer.thetanuts.finance/api/v1',
   THETANUTS_ORDERS_URL: process.env.THETANUTS_ORDERS_URL || 'https://round-snowflake-9c31.devops-118.workers.dev/',
+  // Sync Scheduler Config
+  SYNC_SCHEDULER_ENABLED: process.env.SYNC_SCHEDULER_ENABLED === 'true', // Default false
+  SYNC_INTERVAL_MINUTES: parseInt(process.env.SYNC_INTERVAL_MINUTES || '15', 10),
+  SYNC_DELAY_AFTER_UPDATE: parseInt(process.env.SYNC_DELAY_AFTER_UPDATE || '10000', 10), // 10s default
 };
 
 /**

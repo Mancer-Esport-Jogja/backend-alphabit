@@ -192,18 +192,31 @@ model TradeActivity {
   strikes         Json        // Strike prices array
   expiryTimestamp DateTime
   
+  entryTimestamp    DateTime
+  entryBlock        Int?
+  
   // Financial data
-  entryPremium    String
-  numContracts    String
-  collateralAmount String
+  entryPremium      String
+  entryFeePaid      String
+  numContracts      String
+  collateralAmount  String
   
-  // Settlement (for settled trades)
-  settlementPrice String?
-  payoutBuyer     String?
-  payoutSeller    String?
+  // Settlement
+  settlementPrice           String?
+  payoutBuyer               String?
+  collateralReturnedSeller  String?
+  exercised                 Boolean?
+  oracleFailure             Boolean?
   
-  createdAt       DateTime @default(now())
-  settledAt       DateTime?
+  // Close info
+  closeTimestamp    DateTime?
+  closeTxHash       String?
+  closeBlock        Int?
+  
+  explicitClose     Json?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Config {
@@ -236,8 +249,11 @@ The application supports **dynamic configuration** stored in the database. This 
 
 | Key | Description | Default |
 |-----|-------------|---------|
-| `THETANUTS_INDEXER_URL` | Thetanuts indexer API URL | `https://optionbook-indexer.thetanuts.finance/api/v1` |
+| `THETANUTS_INDEXER_URL` | Thetanuts indexer API URL | `.../api/v1` |
 | `ALPHABIT_REFERRER_ADDRESS` | Referrer wallet address | *(empty)* |
+| `SYNC_SCHEDULER_ENABLED` | Enable/disable background sync | `false` |
+| `SYNC_DELAY_AFTER_UPDATE` | Delay (ms) after indexer update | `10000` |
+| `SYNC_INTERVAL_MINUTES` | Sync interval (requires restart) | `15` |
 
 ### How It Works
 
@@ -257,7 +273,24 @@ UPDATE configs SET value = 'https://new-url.com' WHERE key = 'THETANUTS_INDEXER_
 npx prisma studio
 ```
 
-> ✅ Changes take effect immediately on the next API request - no restart needed.
+> ✅ Changes take effect immediately on the next API request - no restart needed (except `SYNC_INTERVAL_MINUTES`).
+
+---
+
+## 🔄 Hybrid Sync Scheduler
+
+The service implements a **Hybrid Sync Strategy** to keep trade data fresh with minimal API overhead.
+
+| Strategy | Trigger | Flow |
+|----------|---------|------|
+| **On-Demand** | User opens portfolio | Fetch specific user's positions + history |
+| **Post-Trade** | After `fillOrder` | Trigger indexer update → Wait 10s → Sync user |
+| **Scheduled** | Every 15 mins | Trigger indexer update (1x) → Sync **ALL** active users |
+
+### Scheduler Features
+- **Smart Update**: Triggers indexer update only once per cycle to save resources.
+- **Referrer Filter**: Only syncs trades where `referrer` matches `ALPHABIT_REFERRER_ADDRESS`.
+- **Dynamic Control**: Pause/resume scheduler via database config (`SYNC_SCHEDULER_ENABLED`) without downtime.
 
 ---
 
@@ -368,6 +401,8 @@ curl http://localhost:3000/api/users/me \
 | `CORS_ORIGIN` | Allowed CORS origins | No | `*` |
 | `DATABASE_URL` | PostgreSQL connection string | Yes | - |
 | `NEYNAR_API_KEY` | Neynar API key for Farcaster profile data | No | - |
+| `SYNC_SCHEDULER_ENABLED` | Enable background scheduler | No | `false` |
+| `SYNC_INTERVAL_MINUTES` | Scheduler interval in minutes | No | `15` |
 
 ---
 

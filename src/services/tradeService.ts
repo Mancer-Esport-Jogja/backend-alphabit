@@ -313,3 +313,85 @@ export async function getUserTradeStats(userId: string) {
     expired: expiredCount,
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// SCHEDULER SUPPORT FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Trigger Thetanuts indexer update
+ * Call this before syncing to ensure data is fresh
+ */
+export async function triggerIndexerUpdate(): Promise<void> {
+  const url = `${env.THETANUTS_INDEXER_URL}/update`;
+  
+  try {
+    const response = await fetch(url, { method: 'POST' });
+    if (!response.ok) {
+      console.warn(`[TradeService] Indexer update returned ${response.status}`);
+    } else {
+      console.log('[TradeService] Indexer update triggered successfully');
+    }
+  } catch (error) {
+    console.error('[TradeService] Failed to trigger indexer update:', error);
+    // Don't throw - sync can still proceed with potentially stale data
+  }
+}
+
+/**
+ * Sync trades for all active users with wallet addresses
+ * Used by scheduler for periodic background sync
+ */
+export async function syncAllActiveUsers(): Promise<{
+  usersProcessed: number;
+  totalSynced: number;
+  totalCreated: number;
+  totalUpdated: number;
+  errors: number;
+}> {
+  // Get all users with wallet addresses
+  const users = await prisma.user.findMany({
+    where: {
+      primaryEthAddress: { not: null },
+    },
+    select: {
+      id: true,
+      primaryEthAddress: true,
+      username: true,
+    },
+  });
+
+  console.log(`[TradeService] Found ${users.length} users with wallets to sync`);
+
+  let totalSynced = 0;
+  let totalCreated = 0;
+  let totalUpdated = 0;
+  let errors = 0;
+
+  for (const user of users) {
+    if (!user.primaryEthAddress) continue;
+
+    try {
+      const result = await syncUserTrades(user.id, user.primaryEthAddress);
+      totalSynced += result.synced;
+      totalCreated += result.created;
+      totalUpdated += result.updated;
+      
+      if (result.synced > 0) {
+        console.log(`[TradeService] User ${user.username || user.id}: synced ${result.synced} trades`);
+      }
+    } catch (error) {
+      errors++;
+      console.error(`[TradeService] Failed to sync user ${user.id}:`, error);
+    }
+  }
+
+  return {
+    usersProcessed: users.length,
+    totalSynced,
+    totalCreated,
+    totalUpdated,
+    errors,
+  };
+}
+

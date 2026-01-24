@@ -18,6 +18,22 @@ async function main() {
       key: 'ALPHABIT_REFERRER_ADDRESS',
       value: process.env.ALPHABIT_REFERRER_ADDRESS || '',
       description: 'Alphabit Referrer Address'
+    },
+    // Scheduler Configs
+    {
+      key: 'SYNC_SCHEDULER_ENABLED',
+      value: process.env.SYNC_SCHEDULER_ENABLED || 'false',
+      description: 'Enable background sync scheduler'
+    },
+    {
+      key: 'SYNC_INTERVAL_MINUTES',
+      value: process.env.SYNC_INTERVAL_MINUTES || '15',
+      description: 'Sync scheduler interval in minutes'
+    },
+    {
+      key: 'SYNC_DELAY_AFTER_UPDATE',
+      value: process.env.SYNC_DELAY_AFTER_UPDATE || '10000',
+      description: 'Delay (ms) after indexer update'
     }
   ];
 
