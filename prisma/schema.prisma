@@ -102,6 +102,8 @@ model TradeActivity {
   @@index([closeTxHash])                            // Lookup by close tx
   @@index([referrer])                               // Referrer analytics
   @@index([underlyingAsset, status])                // BTC/ETH position filtering
+  @@index([userId, closeTimestamp])                 // PnL history filtering
+  @@index([userId, entryTimestamp])                 // Distribution filtering
   
   @@map("trade_activities")
 }
