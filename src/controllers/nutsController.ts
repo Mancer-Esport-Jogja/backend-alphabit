@@ -9,6 +9,7 @@ import {
   getOptionTypeLabel,
   calculateBreakeven 
 } from '../lib/payoutCalculator';
+import { generatePlanetName } from '../lib/planetName';
 
 // Position type from Thetanuts API
 interface ThetanutsPosition {
@@ -88,6 +89,18 @@ export const nutsController = {
       }
 
       const data = await response.json();
+
+      // Inject planetName into each order
+      if (data?.data?.orders && Array.isArray(data.data.orders)) {
+        data.data.orders = data.data.orders.map((item: any) => {
+          if (item?.order) {
+            const seedString = `${item.order.ticker || ''}-${(item.order.strikes || []).join(',')}`;
+            item.order.planetName = generatePlanetName(seedString);
+          }
+          return item;
+        });
+      }
+
       res.status(200).json({ success: true, data });
     } catch (error) {
       console.error('[NutsController] getOrders error:', error);
