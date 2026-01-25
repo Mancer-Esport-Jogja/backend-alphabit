@@ -24,7 +24,7 @@ Backend service for Alphabit Web3 Mini-App.
 Most endpoints require a Bearer token from Farcaster Quick Auth.
 
 ### Base URL
-- **Production**: \`https://bealpha.mfahrurozi.my.id\`
+- **Production**: \`https://backend-alphabit.onrender.com\`
     `,
     contact: {
       name: 'Alphabit Team'
@@ -36,8 +36,8 @@ Most endpoints require a Bearer token from Farcaster Quick Auth.
   },
   servers: [
     {
-      url: 'https://bealpha.mfahrurozi.my.id/api',
-      description: 'Production server'
+      url: '/api',
+      description: 'Current environment server'
     }
   ],
   tags: [
