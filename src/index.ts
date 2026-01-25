@@ -31,6 +31,14 @@ if (env.NODE_ENV !== 'production') {
 // Routes
 app.use('/api', routes); 
 
+// Root route (avoid 404)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    name: 'Alphabit API',
+    status: 'ok'
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
