@@ -10,19 +10,20 @@ let isSchedulerRunning = false;
  * Initialize scheduler loop
  */
 export async function initScheduler(): Promise<void> {
-  const enabled = await configService.get('SYNC_SCHEDULER_ENABLED') === 'true';
+  const enabled = env.SYNC_SCHEDULER_ENABLED;
   const interval = parseInt(await configService.get('SYNC_INTERVAL_MS'), 10) || 900000; // 15 min default
 
   if (!enabled) {
     console.log('[Scheduler] Scheduler starts disabled (check config to enable)');
-  } else {
-    console.log(`[Scheduler] Starting scheduler service (Interval: ${interval}ms)...`);
-  }
+    return;
+  } 
+
+  console.log(`[Scheduler] Starting scheduler service (Interval: ${interval}ms)...`);
 
   // Start the loop immediately
   if (!isSchedulerRunning) {
     isSchedulerRunning = true;
-    scheduleNextLoop(enabled ? 0 : interval);
+    scheduleNextLoop(0);
   }
 }
 
@@ -50,15 +51,10 @@ async function scheduleNextLoop(delay: number) {
 
     try {
       // 1. Check dynamic config
-      const dynamicEnabled = await configService.get('SYNC_SCHEDULER_ENABLED') === 'true';
       const dynamicInterval = parseInt(await configService.get('SYNC_INTERVAL_MS'), 10) || 900000;
 
-      if (dynamicEnabled) {
-        console.log('[Scheduler] Starting sync cycle...');
-        await runScheduledSync();
-      } else {
-        console.log('[Scheduler] Sync skipped (disabled in config)');
-      }
+      console.log('[Scheduler] Starting sync cycle...');
+      await runScheduledSync();
 
       // 2. Schedule next run
       if (isSchedulerRunning) {
@@ -122,7 +118,8 @@ export async function triggerManualSync(): Promise<{
 }> {
   console.log('[Scheduler] Manual sync triggered');
   await triggerIndexerUpdate();
-  await sleep(env.SYNC_DELAY_AFTER_UPDATE);
+  const delayMs = parseInt(await configService.get('SYNC_DELAY_AFTER_UPDATE'), 10) || 10000;
+  await sleep(delayMs);
   return syncAllActiveUsers();
 }
 

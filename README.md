@@ -274,7 +274,7 @@ model Config {
 
 ## ⚙️ Dynamic Configuration
 
-The application supports **dynamic configuration** stored in the database. This allows updating settings without restarting the service.
+The application supports **dynamic configuration** stored in the database for specific trading parameters.
 
 ### Configurable Keys
 
@@ -282,7 +282,6 @@ The application supports **dynamic configuration** stored in the database. This 
 |-----|-------------|---------|
 | `THETANUTS_INDEXER_URL` | Thetanuts indexer API URL | `.../api/v1` |
 | `ALPHABIT_REFERRER_ADDRESS` | Referrer wallet address | *(empty)* |
-| `SYNC_SCHEDULER_ENABLED` | Enable/disable background sync | `false` |
 | `SYNC_DELAY_AFTER_UPDATE` | Delay (ms) after indexer update | `10000` |
 | `SYNC_INTERVAL_MS` | Sync interval (ms) - Dynamic | `900000` (15m) |
 
@@ -296,7 +295,7 @@ The application supports **dynamic configuration** stored in the database. This 
 
 **Via SQL:**
 ```sql
-UPDATE configs SET value = '30000' WHERE key = 'SYNC_INTERVAL_MS'; -- 30 seconds
+UPDATE configs SET value = 'https://new-url.com' WHERE key = 'THETANUTS_INDEXER_URL';
 ```
 
 **Via Prisma Studio:**
@@ -304,7 +303,7 @@ UPDATE configs SET value = '30000' WHERE key = 'SYNC_INTERVAL_MS'; -- 30 seconds
 npx prisma studio
 ```
 
-> ✅ All changes take effect immediately on nature scheduler cycle - no restart needed.
+> ✅ Changes take effect immediately - no restart needed.
 
 ---
 

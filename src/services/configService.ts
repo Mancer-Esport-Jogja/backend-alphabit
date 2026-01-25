@@ -38,9 +38,7 @@ export const configService = {
       return env.ALPHABIT_REFERRER_ADDRESS || defaultValue;
     }
     // Scheduler config fallbacks
-    if (key === 'SYNC_SCHEDULER_ENABLED') {
-      return String(env.SYNC_SCHEDULER_ENABLED);
-    }
+
     if (key === 'SYNC_INTERVAL_MS') {
       return String(env.SYNC_INTERVAL_MS);
     }
