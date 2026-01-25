@@ -40,8 +40,5 @@ COPY --from=builder /app/src/generated ./src/generated
 # Expose port
 EXPOSE 3000
 
-# Set NODE_ENV
-ENV NODE_ENV=production
-
 # Start command
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
