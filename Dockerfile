@@ -40,5 +40,9 @@ COPY --from=builder /app/src/generated ./src/generated
 # Expose port
 EXPOSE 3000
 
+# Copy start script
+COPY start.sh ./
+RUN sed -i 's/\r$//' start.sh && chmod +x start.sh
+
 # Start command
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["./start.sh"]
