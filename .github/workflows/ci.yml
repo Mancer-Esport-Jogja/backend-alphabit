@@ -1,0 +1,52 @@
+name: CI - Build & Verify
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-node:
+    name: Node.js Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Generate Prisma Client
+      run: npx prisma generate
+      
+    - name: Run Build
+      run: npm run build
+
+  build-docker:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: build-node # Optional: docker build is usually heavier, so waiting for node build is checks is efficient
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: backend-alphabit:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
