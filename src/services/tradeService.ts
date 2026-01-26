@@ -6,6 +6,8 @@ import { Prisma } from '../generated/prisma/client';
 import { env } from '../config/env';
 import { getOptionTypeLabel } from '../lib/payoutCalculator';
 import { statsService } from './statsService';
+import { fetchWithLogging } from '../lib/httpClient';
+
 
 // Thetanuts API position type - Complete mapping from API response
 interface ThetanutsPosition {
@@ -211,7 +213,7 @@ async function fetchPositionsFromThetanuts(
   const endpoint = type === 'open' ? 'positions' : 'history';
   const url = `${env.THETANUTS_INDEXER_URL}/user/${walletAddress}/${endpoint}`;
   
-  const response = await fetch(url);
+  const response = await fetchWithLogging(url);
   if (!response.ok) {
     throw new Error(`Thetanuts API error: ${response.status}`);
   }
@@ -425,7 +427,7 @@ export async function triggerIndexerUpdate(): Promise<void> {
   const url = `${env.THETANUTS_INDEXER_URL}/update`;
   
   try {
-    const response = await fetch(url, { method: 'POST' });
+    const response = await fetchWithLogging(url, { method: 'POST' });
     if (!response.ok) {
       console.warn(`[TradeService] Indexer update returned ${response.status}`);
     } else {

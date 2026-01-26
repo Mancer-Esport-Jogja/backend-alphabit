@@ -1,5 +1,7 @@
 import { env, isDevelopment } from '../config/env';
+
 import { isDevUserFid, getDevUserByFid } from '../config/mockData';
+import { fetchWithLogging } from '../lib/httpClient';
 
 /**
  * User data types from Neynar Snapchain API
@@ -78,7 +80,7 @@ export const neynarService = {
     }
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${NEYNAR_BASE_URL}/userDataByFid?fid=${fid}`,
         {
           method: 'GET',

@@ -9,6 +9,8 @@ import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { initScheduler } from './services/schedulerService';
 
+import { requestResponseLogger } from './middlewares/logging';
+
 const app = express();
 
 // Middleware
@@ -18,6 +20,7 @@ app.use(helmet({
 app.use(morgan('dev')); 
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
+app.use(requestResponseLogger);
 
 // Swagger API Documentation - Only available in non-production
 if (env.NODE_ENV !== 'production') {
