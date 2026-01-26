@@ -20,6 +20,9 @@ export const env = {
   SYNC_SCHEDULER_ENABLED: process.env.SYNC_SCHEDULER_ENABLED === 'true', // Default false
   SYNC_INTERVAL_MS: parseInt(process.env.SYNC_INTERVAL_MS || '900000', 10), // Default 15 min (15 * 60 * 1000)
   SYNC_DELAY_AFTER_UPDATE: parseInt(process.env.SYNC_DELAY_AFTER_UPDATE || '10000', 10), // 10s default
+  // Logging Configuration (JSON)
+  LOG_INTERNAL_CONFIG: process.env.LOG_INTERNAL_CONFIG || '{}',
+  LOG_EXTERNAL_CONFIG: process.env.LOG_EXTERNAL_CONFIG || '{}',
 };
 
 /**

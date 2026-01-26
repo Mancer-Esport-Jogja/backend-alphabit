@@ -34,6 +34,17 @@ async function main() {
       key: 'SYNC_DELAY_AFTER_UPDATE',
       value: process.env.SYNC_DELAY_AFTER_UPDATE || '10000',
       description: 'Delay (ms) after indexer update'
+    },
+    // Logging Configs
+    {
+      key: 'LOG_INTERNAL_CONFIG',
+      value: process.env.LOG_INTERNAL_CONFIG || '{"enabled":true,"body":true,"maxBodyLength":1000,"sensitiveKeys":["password","token","authorization","secret","key"],"excludePaths":["/api/health","/metrics","/favicon.ico"],"minify":false}',
+      description: 'Internal API logging configuration (JSON)'
+    },
+    {
+      key: 'LOG_EXTERNAL_CONFIG',
+      value: process.env.LOG_EXTERNAL_CONFIG || '{"enabled":true,"body":true,"maxBodyLength":1000,"sensitiveKeys":["password","token","authorization","secret","key","apiKey"],"excludePaths":[],"minify":false}',
+      description: 'External API logging configuration (JSON)'
     }
   ];
 
