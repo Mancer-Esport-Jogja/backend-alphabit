@@ -4,6 +4,7 @@
 import prisma from '../lib/prisma';
 import { Prisma } from '../generated/prisma/client';
 import { env } from '../config/env';
+import { configService } from './configService';
 import { getOptionTypeLabel } from '../lib/payoutCalculator';
 import { statsService } from './statsService';
 import { fetchWithLogging } from '../lib/httpClient';
@@ -211,7 +212,8 @@ async function fetchPositionsFromThetanuts(
   type: 'open' | 'history'
 ): Promise<ThetanutsPosition[]> {
   const endpoint = type === 'open' ? 'positions' : 'history';
-  const url = `${env.THETANUTS_INDEXER_URL}/user/${walletAddress}/${endpoint}`;
+  const indexerUrl = await configService.get('THETANUTS_INDEXER_URL');
+  const url = `${indexerUrl}/user/${walletAddress}/${endpoint}`;
   
   const response = await fetchWithLogging(url);
   if (!response.ok) {
@@ -244,9 +246,11 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
 
   // Filter by our referrer if configured
   let positionsToSync = Array.from(uniquePositions.values());
-  if (env.ALPHABIT_REFERRER_ADDRESS) {
+  const referrerAddress = await configService.get('ALPHABIT_REFERRER_ADDRESS');
+  
+  if (referrerAddress) {
     positionsToSync = positionsToSync.filter(
-      p => p.referrer?.toLowerCase() === env.ALPHABIT_REFERRER_ADDRESS.toLowerCase()
+      p => p.referrer?.toLowerCase() === referrerAddress.toLowerCase()
     );
   }
 
@@ -424,7 +428,8 @@ export async function getUserTradeStats(userId: string) {
  * Call this before syncing to ensure data is fresh
  */
 export async function triggerIndexerUpdate(): Promise<void> {
-  const url = `${env.THETANUTS_INDEXER_URL}/update`;
+  const indexerUrl = await configService.get('THETANUTS_INDEXER_URL');
+  const url = `${indexerUrl}/update`;
   
   try {
     const response = await fetchWithLogging(url, { method: 'POST' });

@@ -10,7 +10,7 @@ let isSchedulerRunning = false;
  * Initialize scheduler loop
  */
 export async function initScheduler(): Promise<void> {
-  const enabled = env.SYNC_SCHEDULER_ENABLED;
+  const enabled = (await configService.get('SYNC_SCHEDULER_ENABLED')) === 'true';
   const interval = parseInt(await configService.get('SYNC_INTERVAL_MS'), 10) || 900000; // 15 min default
 
   if (!enabled) {

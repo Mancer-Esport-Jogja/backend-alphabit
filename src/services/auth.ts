@@ -1,5 +1,6 @@
 import { createClient, Errors } from '@farcaster/quick-auth';
 import { env, isDevelopment } from '../config/env';
+import { configService } from './configService';
 import { isDevToken, getDevUserByToken } from '../config/mockData';
 
 // Initialize the Quick Auth client
@@ -28,7 +29,8 @@ export const authService = {
     }
 
     // Production validation
-    if (!env.DOMAIN) {
+    const domain = await configService.get('DOMAIN');
+    if (!domain) {
       console.error('DOMAIN env var is missing');
       return { valid: false, error: 'Server configuration error' };
     }
@@ -36,7 +38,7 @@ export const authService = {
     try {
       const payload = await client.verifyJwt({ 
         token, 
-        domain: env.DOMAIN 
+        domain 
       });
 
       return { 
