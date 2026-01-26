@@ -27,15 +27,19 @@ const DEFAULT_EXTERNAL_CONFIG: LogConfig = {
   minify: false,
 };
 
+import { configService } from '../services/configService';
+
 /**
- * Parse logging configuration from JSON environment variables
+ * Parse logging configuration from database/env
  */
-export const getLogConfig = (type: 'internal' | 'external'): LogConfig => {
-  const envValue = type === 'internal' ? env.LOG_INTERNAL_CONFIG : env.LOG_EXTERNAL_CONFIG;
+export const getLogConfig = async (type: 'internal' | 'external'): Promise<LogConfig> => {
   const defaults = type === 'internal' ? DEFAULT_INTERNAL_CONFIG : DEFAULT_EXTERNAL_CONFIG;
+  const configKey = type === 'internal' ? 'LOG_INTERNAL_CONFIG' : 'LOG_EXTERNAL_CONFIG';
+  
+  const configValue = await configService.get(configKey, JSON.stringify(defaults));
 
   try {
-    const userConfig = JSON.parse(envValue);
+    const userConfig = JSON.parse(configValue);
     return { ...defaults, ...userConfig };
   } catch (error) {
     console.warn(`[Config] Failed to parse ${type} logging config JSON. Using defaults.`, error);

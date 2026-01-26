@@ -12,7 +12,7 @@ interface FetchOptions extends RequestInit {
 export const fetchWithLogging = async (url: string | URL, options: FetchOptions = {}): Promise<Response> => {
   const method = options.method || 'GET';
   const urlString = url.toString();
-  const config = getLogConfig('external');
+  const config = await getLogConfig('external');
 
   // 1. Log Request
   if (config.enabled) {

@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 
 import { getLogConfig, formatLogBody } from '../config/logging';
 
-export const requestResponseLogger = (req: Request, res: Response, next: NextFunction) => {
-  const config = getLogConfig('internal');
+export const requestResponseLogger = async (req: Request, res: Response, next: NextFunction) => {
+  const config = await getLogConfig('internal');
 
   // 1. Check Master Toggle & Exclusions
   if (!config.enabled || config.excludePaths.some(path => req.url.startsWith(path))) {
