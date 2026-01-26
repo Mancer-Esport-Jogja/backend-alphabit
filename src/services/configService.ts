@@ -86,14 +86,10 @@ export const configService = {
  * Helper to get fallback from env variables
  */
 function getEnvFallback(key: string): string | undefined {
-  switch (key) {
-    case 'DOMAIN': return env.DOMAIN;
-    case 'THETANUTS_INDEXER_URL': return env.THETANUTS_INDEXER_URL;
-    case 'ALPHABIT_REFERRER_ADDRESS': return env.ALPHABIT_REFERRER_ADDRESS;
-    case 'SYNC_INTERVAL_MS': return String(env.SYNC_INTERVAL_MS);
-    case 'SYNC_DELAY_AFTER_UPDATE': return String(env.SYNC_DELAY_AFTER_UPDATE);
-    case 'LOG_INTERNAL_CONFIG': return env.LOG_INTERNAL_CONFIG;
-    case 'LOG_EXTERNAL_CONFIG': return env.LOG_EXTERNAL_CONFIG;
-    default: return undefined;
-  }
+  // Check process.env directly to avoid default values from env.ts
+  // This ensures that if a value is NOT in .env, we return undefined
+  // allowing the system to fall back to the Database.
+  
+  const val = process.env[key];
+  return val;
 }
