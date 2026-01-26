@@ -24,29 +24,16 @@ export const authController = {
         return;
       }
 
-      // Fetch user profile data from Neynar
-      const profileData = await neynarService.getUserDataByFid(fid);
-
-      // Find user by FID (primary identity)
+      // Check if user exists in database first
       let user = await prisma.user.findUnique({
         where: { fid: BigInt(fid) }
       });
 
       let isNewUser = false;
 
-      if (!user) {
-        // Create new user with verified FID and Neynar profile data
-        user = await prisma.user.create({
-          data: {
-            fid: BigInt(fid),
-            username: profileData.username,
-            displayName: profileData.displayName,
-            pfpUrl: profileData.pfpUrl,
-            primaryEthAddress: profileData.primaryEthAddress
-          }
-        });
-        isNewUser = true;
-      } else {
+      if (user) {
+        // User exists - skip Neynar fetch, just update streaks/activity
+        
         // Calculate Streak (UTC Midnight)
         const now = new Date();
         const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -81,7 +68,7 @@ export const authController = {
            // if 0, same day, do nothing to streak
         }
 
-        // Update existing user
+        // Update existing user (WITHOUT updating profile from Neynar)
         const maxStreak = Math.max(newStreak, user.maxLoginStreak);
 
         user = await prisma.user.update({
@@ -93,13 +80,24 @@ export const authController = {
             currentLoginStreak: newStreak,
             maxLoginStreak: maxStreak,
             lastLoginDate: lastLoginDateToUpdate,
-
-            // Update profile data from Neynar (always refresh)
-            username: profileData.username || user.username,
-            displayName: profileData.displayName || user.displayName,
-            pfpUrl: profileData.pfpUrl || user.pfpUrl,
           }
         });
+
+      } else {
+        // New user - fetch profile data from Neynar
+        const profileData = await neynarService.getUserDataByFid(fid);
+
+        // Create new user with verified FID and Neynar profile data
+        user = await prisma.user.create({
+          data: {
+            fid: BigInt(fid),
+            username: profileData.username,
+            displayName: profileData.displayName,
+            pfpUrl: profileData.pfpUrl,
+            primaryEthAddress: profileData.primaryEthAddress
+          }
+        });
+        isNewUser = true;
       }
 
       res.status(isNewUser ? 201 : 200).json({
