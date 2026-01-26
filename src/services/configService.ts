@@ -22,14 +22,20 @@ export const configService = {
    * Checks Cache -> Database -> Env -> Default.
    */
   get: async (key: string, defaultValue: string = ''): Promise<string> => {
-    // 1. Check Cache
+    // 1. Check environment variables first (Static override)
+    const envValue = getEnvFallback(key);
+    if (envValue !== undefined && envValue !== '') {
+      return envValue;
+    }
+
+    // 2. Check Cache
     const cached = configCache.get(key);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return cached.value;
     }
 
     try {
-      // 2. Try to fetch from database
+      // 3. Try to fetch from database
       const config = await prisma.config.findUnique({
         where: { key },
       });
@@ -46,12 +52,7 @@ export const configService = {
       console.warn(`[ConfigService] Failed to fetch config for key ${key} from DB, using fallback. Error: ${error instanceof Error ? error.message : String(error)}`);
     }
 
-    // 3. Fallback to environment variables
-    const envValue = getEnvFallback(key);
-    if (envValue !== undefined) {
-      return envValue;
-    }
-
+    // 4. Fallback to default
     return defaultValue;
   },
 
