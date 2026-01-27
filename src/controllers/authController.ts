@@ -2,10 +2,17 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { neynarService } from '../services/neynar';
 import { configService } from '../services/configService';
-import { verifyMessage } from 'viem';
+import { createPublicClient, http } from 'viem';
+import { base } from 'viem/chains';
 
 import { isDevelopment } from '../config/env';
 import { getDevUserByFid } from '../config/mockData';
+
+// Initialize public client for Smart Wallet signature verification (ERC-1271)
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http(),
+});
 
 export const authController = {
   /**
@@ -175,7 +182,8 @@ export const authController = {
       // Message format should be consistent with Frontend: "Bind Wallet {address} to Alphabit Account {fid}"
       const message = `Bind Wallet ${address} to Alphabit Account ${fid}`;
       
-      const valid = await verifyMessage({
+      // Use publicClient to verify message (supports Smart Wallets / ERC-1271)
+      const valid = await publicClient.verifyMessage({
         address: address,
         message: message,
         signature: signature,
@@ -213,3 +221,4 @@ export const authController = {
     }
   }
 };
+
