@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { neynarService } from '../services/neynar';
+import { verifyMessage } from 'viem';
 
 export const authController = {
   /**
@@ -121,6 +122,72 @@ export const authController = {
           isNewUser
         }
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Bind a wallet address to the user account
+   * Requires:
+   * 1. Valid Auth Token (from Farcaster)
+   * 2. Wallet Address
+   * 3. Signature (SIWE) proving ownership of the wallet
+   * 
+   * POST /auth/bind-wallet
+   */
+  bindWallet: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const fid = req.user?.fid;
+      const { address, signature } = req.body;
+
+      if (!fid) {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+        return;
+      }
+
+      if (!address || !signature) {
+        res.status(400).json({ success: false, error: 'Address and signature are required' });
+        return;
+      }
+
+      // 1. Verify Signature (SIWE)
+      // Message format should be consistent with Frontend: "Bind Wallet {address} to Alphabit Account {fid}"
+      const message = `Bind Wallet ${address} to Alphabit Account ${fid}`;
+      
+      const valid = await verifyMessage({
+        address: address,
+        message: message,
+        signature: signature,
+      });
+
+      if (!valid) {
+        res.status(401).json({ success: false, error: 'Invalid signature' });
+        return;
+      }
+
+      // 2. Update User
+      const user = await prisma.user.update({
+        where: { fid: BigInt(fid) },
+        data: {
+          primaryEthAddress: address
+        }
+      });
+      
+      console.log(`[Auth] User ${fid} bound wallet: ${address}`);
+
+      res.status(200).json({
+        success: true,
+        data: {
+            message: 'Wallet bound successfully',
+            user: {
+                id: user.id,
+                fid: user.fid.toString(),
+                primaryEthAddress: user.primaryEthAddress
+            }
+        }
+      });
+
     } catch (error) {
       next(error);
     }

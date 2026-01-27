@@ -6,5 +6,6 @@ const router = Router();
 
 // POST /auth - Authenticate user (requires Bearer token)
 router.post('/', requireAuth, authController.authenticate);
+router.post('/bind-wallet', requireAuth, authController.bindWallet);
 
 export default router;
