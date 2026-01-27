@@ -179,8 +179,8 @@ export const authController = {
       }
 
       // 1. Verify Signature (SIWE)
-      // Message format should be consistent with Frontend: "Bind Wallet {address} to Alphabit Account {fid}"
-      const message = `Bind Wallet ${address} to Alphabit Account ${fid}`;
+      // Message format should be consistent with Frontend: "Sync Wallet {address} to Alphabit Account {fid}"
+      const message = `Sync Wallet ${address} to Alphabit Account ${fid}`;
       
       // Use publicClient to verify message (supports Smart Wallets / ERC-1271)
       const valid = await publicClient.verifyMessage({
