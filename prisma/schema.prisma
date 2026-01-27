@@ -40,10 +40,18 @@ model User {
   trades             TradeActivity[]
   userDailyStats     UserDailyStats[]
 
+  status             UserStatus   @default(ACTIVE)
+
   @@index([fid])
   @@index([primaryEthAddress])
   @@map("users")
   userStats          UserStats[]
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }
 
 // Option B: Persistent User Stats for Leaderboard

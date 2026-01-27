@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { neynarService } from '../services/neynar';
+import { configService } from '../services/configService';
 import { verifyMessage } from 'viem';
+
+import { isDevelopment } from '../config/env';
+import { getDevUserByFid } from '../config/mockData';
 
 export const authController = {
   /**
@@ -88,6 +92,20 @@ export const authController = {
         // New user - fetch profile data from Neynar
         const profileData = await neynarService.getUserDataByFid(fid);
 
+        // Fetch default status configuration
+        // Default to 'true' (ACTIVE) if not set
+        const defaultStatusActive = await configService.get('DEFAULT_USER_STATUS_ACTIVE', 'true');
+        let initialStatus: 'ACTIVE' | 'INACTIVE' = defaultStatusActive === 'true' ? 'ACTIVE' : 'INACTIVE';
+
+        // DEV MODE: Use status from mock data if available
+        if (isDevelopment) {
+            const devUser = getDevUserByFid(Number(fid));
+            if (devUser && devUser.status) {
+                // @ts-ignore - Prisma enum compatibility
+                initialStatus = devUser.status;
+            }
+        }
+
         // Create new user with verified FID and Neynar profile data
         user = await prisma.user.create({
           data: {
@@ -95,7 +113,8 @@ export const authController = {
             username: profileData.username,
             displayName: profileData.displayName,
             pfpUrl: profileData.pfpUrl,
-            primaryEthAddress: profileData.primaryEthAddress
+            primaryEthAddress: profileData.primaryEthAddress,
+            status: initialStatus
           }
         });
         isNewUser = true;
@@ -117,7 +136,8 @@ export const authController = {
             currentLoginStreak: user.currentLoginStreak,
             maxLoginStreak: user.maxLoginStreak,
             currentWinStreak: user.currentWinStreak,
-            maxWinStreak: user.maxWinStreak
+            maxWinStreak: user.maxWinStreak,
+            status: user.status
           },
           isNewUser
         }

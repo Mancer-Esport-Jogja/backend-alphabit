@@ -72,5 +72,57 @@ Authenticate and register user with Farcaster Quick Auth.
         }
       }
     }
+  },
+  '/auth/bind-wallet': {
+    post: {
+      summary: 'Bind wallet to user',
+      description: `
+Bind an Ethereum wallet address to the authenticated user.
+
+**Requirements:**
+- Bearer token (Farcaster Quick Auth)
+- Wallet \`address\`
+- \`signature\` proving wallet ownership
+
+**Signature message format (must match backend):**
+\`Bind Wallet {address} to Alphabit Account {fid}\`
+      `,
+      tags: ['Auth'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/BindWalletRequest' }
+          }
+        }
+      },
+      responses: {
+        '200': {
+          description: 'Wallet bound successfully',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/BindWalletResponse' }
+            }
+          }
+        },
+        '400': {
+          description: 'Bad request - Address and signature are required',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+            }
+          }
+        },
+        '401': {
+          description: 'Unauthorized - Missing token or invalid signature',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+            }
+          }
+        }
+      }
+    }
   }
 };

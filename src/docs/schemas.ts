@@ -76,6 +76,45 @@ export const schemas = {
       }
     }
   },
+  BindWalletRequest: {
+    type: 'object',
+    required: ['address', 'signature'],
+    properties: {
+      address: {
+        type: 'string',
+        description: 'Ethereum wallet address to bind',
+        example: '0xf072abd2572d66dA48eB97e604F01A1d2e857eB1'
+      },
+      signature: {
+        type: 'string',
+        description: 'Signature proving wallet ownership (SIWE-style message signature)',
+        example: '0x...'
+      }
+    }
+  },
+  BindWalletResponse: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: true },
+      data: {
+        type: 'object',
+        properties: {
+          message: { type: 'string', example: 'Wallet bound successfully' },
+          user: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', example: 'clxyz123abc' },
+              fid: { type: 'string', example: '12345' },
+              primaryEthAddress: {
+                type: 'string',
+                example: '0xf072abd2572d66dA48eB97e604F01A1d2e857eB1'
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   SuccessResponse: {
     type: 'object',
     properties: {

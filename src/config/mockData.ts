@@ -17,6 +17,7 @@ export interface DevUser {
   displayName: string;
   pfpUrl: string;
   primaryEthAddress: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
 }
 
 // ============================================================================
@@ -41,21 +42,24 @@ export const DEV_USERS: DevUser[] = [
     username: 'dev_user',
     displayName: 'Development User',
     pfpUrl: 'https://i.imgur.com/YQwNqvu.png',
-    primaryEthAddress: '0x0000000000000000000000000000000000000001'
+    primaryEthAddress: '0x0000000000000000000000000000000000000001',
+    status: 'ACTIVE'
   },
   {
     fid: 999998,
     username: 'dev_user_2',
     displayName: 'Development User 2',
     pfpUrl: 'https://i.imgur.com/YQwNqvu.png',
-    primaryEthAddress: '0x0000000000000000000000000000000000000002'
+    primaryEthAddress: '0x0000000000000000000000000000000000000002',
+    status: 'ACTIVE'
   },
   {
     fid: 999997,
     username: 'dev_user_3',
     displayName: 'Development User 3',
     pfpUrl: 'https://i.imgur.com/YQwNqvu.png',
-    primaryEthAddress: '0x0000000000000000000000000000000000000003'
+    primaryEthAddress: '0x0000000000000000000000000000000000000003',
+    status: 'INACTIVE'
   }
 ];
 
