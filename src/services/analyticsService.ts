@@ -42,7 +42,7 @@ export const analyticsService = {
       const isSettled = trade.status === 'SETTLED';
 
       // Volume (Active + Settled)
-      const volume = Number(trade.collateralAmount) / divisor;
+      const volume = Number(trade.entryPremium) / divisor;
       totalVolume += volume;
 
       if (isSettled) {
@@ -242,7 +242,7 @@ export const analyticsService = {
       select: {
         underlyingAsset: true,
         optionType: true,
-        collateralAmount: true,
+        entryPremium: true,
         collateralDecimals: true
       }
     });
@@ -269,7 +269,7 @@ export const analyticsService = {
       // Assets
       const decimals = trade.collateralDecimals || 6;
       const divisor = Math.pow(10, decimals);
-      const volume = Number(trade.collateralAmount) / divisor;
+      const volume = Number(trade.entryPremium) / divisor;
       
       const assetStat = assetMap.get(trade.underlyingAsset) || { count: 0, volume: 0 };
       assetStat.count++;
