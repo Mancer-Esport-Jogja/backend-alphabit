@@ -45,6 +45,18 @@ async function main() {
       key: 'LOG_EXTERNAL_CONFIG',
       value: process.env.LOG_EXTERNAL_CONFIG || '{"enabled":true,"body":true,"maxBodyLength":1000,"sensitiveKeys":["password","token","authorization","secret","key","apiKey"],"excludePaths":[],"minify":false}',
       description: 'External API logging configuration (JSON)'
+    },
+    // Neynar API Config
+    {
+      key: 'NEYNAR_API_URL',
+      value: 'https://api.neynar.com/v2',
+      description: 'Neynar API base URL for notifications'
+    },
+    // Expiry Reminder Config
+    {
+      key: 'EXPIRY_REMINDER_ENABLED',
+      value: 'true',
+      description: 'Enable daily expiry reminder notification at 7 AM UTC'
     }
   ];
 
@@ -57,6 +69,41 @@ async function main() {
       create: config,
     });
     console.log(`Created/Updated config: ${result.key}`);
+  }
+
+  // Seed notification templates
+  const notificationTemplates = [
+    {
+      code: 'TRADE_SETTLED',
+      title: 'Trade Settled ✅',
+      body: 'Your trade has been settled! Check your results.',
+      targetUrl: 'https://app.alphabit.xyz/trades'
+    },
+    {
+      code: 'TRADE_EXPIRED',
+      title: 'Trade Expired ⏰',
+      body: 'Your trade has expired.',
+      targetUrl: 'https://app.alphabit.xyz/trades'
+    },
+    {
+      code: 'TRADE_EXPIRING_SOON',
+      title: 'Trade Expiring Soon ⏳',
+      body: 'Your trade will expire in 1 hour! Take action now.',
+      targetUrl: 'https://app.alphabit.xyz/trades'
+    }
+  ];
+
+  for (const template of notificationTemplates) {
+    const result = await prisma.notificationTemplate.upsert({
+      where: { code: template.code },
+      update: {
+        title: template.title,
+        body: template.body,
+        targetUrl: template.targetUrl
+      },
+      create: template,
+    });
+    console.log(`Created/Updated notification template: ${result.code}`);
   }
 
   console.log('✅ Seeding finished.');

@@ -1,10 +1,13 @@
 import { env } from '../config/env';
 import { configService } from './configService';
-import { syncAllActiveUsers, triggerIndexerUpdate } from './tradeService';
+import { syncAllActiveUsers, triggerIndexerUpdate, getExpiringTrades } from './tradeService';
+import { sendBatchNotification } from './notificationService';
+import * as cron from 'node-cron';
 
 // Store timeout reference for graceful shutdown
 let schedulerTimeout: NodeJS.Timeout | null = null;
 let isSchedulerRunning = false;
+let expiryReminderTask: ReturnType<typeof cron.schedule> | null = null;
 
 /**
  * Initialize scheduler loop
@@ -28,6 +31,49 @@ export async function initScheduler(): Promise<void> {
 }
 
 /**
+ * Initialize expiry reminder cron job
+ * Runs at 7:00 AM UTC daily
+ */
+export async function initExpiryReminderCron(): Promise<void> {
+  const enabled = (await configService.get('EXPIRY_REMINDER_ENABLED', 'true')) === 'true';
+  
+  if (!enabled) {
+    console.log('[Scheduler] Expiry reminder cron disabled');
+    return;
+  }
+
+  // Schedule at 7:00 AM UTC daily: "0 7 * * *"
+  expiryReminderTask = cron.schedule('0 7 * * *', async () => {
+    console.log('[Scheduler] Running expiry reminder job (7:00 AM UTC)...');
+    await sendExpiryReminders();
+  }, {
+    timezone: 'UTC'
+  });
+
+  console.log('[Scheduler] Expiry reminder cron scheduled for 7:00 AM UTC daily');
+}
+
+/**
+ * Send expiry reminder notifications
+ * Notifies ACTIVE users with trades expiring within 60 minutes
+ */
+export async function sendExpiryReminders(): Promise<void> {
+  try {
+    const fids = await getExpiringTrades(60); // 60 minutes
+    
+    if (fids.length === 0) {
+      console.log('[Scheduler] No expiring trades found, skipping notification');
+      return;
+    }
+    
+    await sendBatchNotification('TRADE_EXPIRING_SOON', fids);
+    console.log(`[Scheduler] Sent expiry reminder to ${fids.length} users`);
+  } catch (error) {
+    console.error('[Scheduler] Expiry reminder failed:', error);
+  }
+}
+
+/**
  * Stop scheduler gracefully
  */
 export function stopScheduler(): void {
@@ -36,6 +82,10 @@ export function stopScheduler(): void {
   if (schedulerTimeout) {
     clearTimeout(schedulerTimeout);
     schedulerTimeout = null;
+  }
+  if (expiryReminderTask) {
+    expiryReminderTask.stop();
+    expiryReminderTask = null;
   }
   console.log('[Scheduler] Scheduler service stopped');
 }

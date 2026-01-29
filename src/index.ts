@@ -7,7 +7,7 @@ import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
-import { initScheduler } from './services/schedulerService';
+import { initScheduler, initExpiryReminderCron } from './services/schedulerService';
 
 import { requestResponseLogger } from './middlewares/logging';
 
@@ -51,11 +51,11 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-// Start server
 app.listen(env.PORT, async () => {
   console.log(`🚀 Server running on port ${env.PORT}`);
   console.log(`📍 Environment: ${env.NODE_ENV}`);
   
-  // Initialize scheduler
+  // Initialize schedulers
   await initScheduler();
+  await initExpiryReminderCron();
 });

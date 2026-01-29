@@ -8,6 +8,7 @@ import { configService } from './configService';
 import { getOptionTypeLabel } from '../lib/payoutCalculator';
 import { statsService } from './statsService';
 import { fetchWithLogging } from '../lib/httpClient';
+import { sendBatchNotification } from './notificationService';
 
 
 // Thetanuts API position type - Complete mapping from API response
@@ -225,11 +226,14 @@ async function fetchPositionsFromThetanuts(
 
 /**
  * Sync user trades from Thetanuts to database
+ * Returns count of status transitions for notification purposes
  */
 export async function syncUserTrades(userId: string, walletAddress: string): Promise<{
   synced: number;
   created: number;
   updated: number;
+  settledCount: number;
+  expiredCount: number;
 }> {
   // Fetch both open positions and history
   const [positions, history] = await Promise.all([
@@ -256,6 +260,8 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
 
   let created = 0;
   let updated = 0;
+  let settledCount = 0;
+  let expiredCount = 0;
 
   // Upsert each position
   for (const position of positionsToSync) {
@@ -266,6 +272,9 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
     });
 
     if (existing) {
+      // Check for status transition: OPEN → SETTLED/EXPIRED
+      const statusChanged = existing.status === 'OPEN' && data.status !== 'OPEN';
+      
       await prisma.tradeActivity.update({
         where: { txHash: position.entryTxHash },
         data: {
@@ -297,6 +306,12 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
         },
       });
       updated++;
+      
+      // Track status transitions for notifications
+      if (statusChanged) {
+        if (data.status === 'SETTLED') settledCount++;
+        if (data.status === 'EXPIRED') expiredCount++;
+      }
     } else {
       await prisma.tradeActivity.create({
         data,
@@ -319,6 +334,8 @@ export async function syncUserTrades(userId: string, walletAddress: string): Pro
     synced: positionsToSync.length,
     created,
     updated,
+    settledCount,
+    expiredCount,
   };
 }
 
@@ -455,13 +472,15 @@ export async function syncAllActiveUsers(): Promise<{
   totalUpdated: number;
   errors: number;
 }> {
-  // Get all users with wallet addresses
+  // Get all ACTIVE users with wallet addresses
   const users = await prisma.user.findMany({
     where: {
       primaryEthAddress: { not: null },
+      status: 'ACTIVE',
     },
     select: {
       id: true,
+      fid: true,
       primaryEthAddress: true,
       username: true,
     },
@@ -473,6 +492,10 @@ export async function syncAllActiveUsers(): Promise<{
   let totalCreated = 0;
   let totalUpdated = 0;
   let errors = 0;
+  
+  // Collect FIDs for batch notifications
+  const settledFids: number[] = [];
+  const expiredFids: number[] = [];
 
   for (const user of users) {
     if (!user.primaryEthAddress) continue;
@@ -483,13 +506,29 @@ export async function syncAllActiveUsers(): Promise<{
       totalCreated += result.created;
       totalUpdated += result.updated;
       
+      // Collect FIDs with status transitions
+      if (result.settledCount > 0) settledFids.push(Number(user.fid));
+      if (result.expiredCount > 0) expiredFids.push(Number(user.fid));
+      
       if (result.synced > 0) {
-        console.log(`[TradeService] User ${user.username || user.id}: synced ${result.synced} trades`);
+        console.log(`[TradeService] User ${user.username || user.id}: synced ${result.synced} trades (settled: ${result.settledCount}, expired: ${result.expiredCount})`);
       }
     } catch (error) {
       errors++;
       console.error(`[TradeService] Failed to sync user ${user.id}:`, error);
     }
+  }
+
+  // Send batch notifications (1 API call per status type)
+  try {
+    if (settledFids.length > 0) {
+      await sendBatchNotification('TRADE_SETTLED', settledFids);
+    }
+    if (expiredFids.length > 0) {
+      await sendBatchNotification('TRADE_EXPIRED', expiredFids);
+    }
+  } catch (error) {
+    console.error('[TradeService] Failed to send notifications:', error);
   }
 
   return {
@@ -501,3 +540,34 @@ export async function syncAllActiveUsers(): Promise<{
   };
 }
 
+/**
+ * Get FIDs of ACTIVE users with trades expiring within a time window
+ * Used by expiry reminder cron job at 7 AM UTC
+ */
+export async function getExpiringTrades(withinMinutes: number = 60): Promise<number[]> {
+  const now = new Date();
+  const expiryWindow = new Date(now.getTime() + withinMinutes * 60 * 1000);
+  
+  const trades = await prisma.tradeActivity.findMany({
+    where: {
+      status: 'OPEN',
+      expiryTimestamp: {
+        gte: now,
+        lte: expiryWindow
+      },
+      user: {
+        status: 'ACTIVE'
+      }
+    },
+    include: { 
+      user: { 
+        select: { fid: true } 
+      } 
+    }
+  });
+  
+  // Get unique FIDs
+  const fids = [...new Set(trades.map(t => Number(t.user.fid)))];
+  console.log(`[TradeService] Found ${trades.length} trades expiring within ${withinMinutes} minutes for ${fids.length} users`);
+  return fids;
+}

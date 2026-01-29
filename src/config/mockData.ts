@@ -43,7 +43,7 @@ export const DEV_USERS: DevUser[] = [
     displayName: 'Development User',
     pfpUrl: 'https://i.imgur.com/YQwNqvu.png',
     primaryEthAddress: '0x0000000000000000000000000000000000000001',
-    status: 'ACTIVE'
+    status: 'INACTIVE'
   },
   {
     fid: 999998,

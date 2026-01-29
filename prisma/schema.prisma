@@ -188,3 +188,19 @@ model Config {
 
   @@map("configs")
 }
+
+/// Notification templates for Neynar push notifications
+model NotificationTemplate {
+  id          String   @id @default(cuid())
+  code        String   @unique  // e.g. "TRADE_SETTLED", "TRADE_EXPIRED"
+  title       String             // Notification title
+  body        String   @db.Text  // Notification body text
+  targetUrl   String   @map("target_url")  // Deep link URL
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("notification_templates")
+}
+
