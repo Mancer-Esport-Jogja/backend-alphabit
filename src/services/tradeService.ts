@@ -196,14 +196,16 @@ function calculateRoi(position: ThetanutsPosition): number | null {
   return ((payout - premium) / premium) * 100;
 }
 
+
 /**
- * Calculate Normalized Volume (Collateral Amount)
+ * Calculate Normalized Volume (Entry Premium - actual user spend)
  */
 function calculateVolume(position: ThetanutsPosition): number {
   const decimals = position.collateralDecimals || 6;
   const divisor = Math.pow(10, decimals);
-  return Number(position.collateralAmount) / divisor;
+  return Number(position.entryPremium) / divisor;
 }
+
 
 /**
  * Fetch positions from Thetanuts API

@@ -62,12 +62,12 @@ model UserStats {
   period          String    @db.VarChar(16)
   
   // Aggregated Stats (Decimal for accuracy)
-  totalPnl        Decimal   @default(0) @db.Decimal(20, 8)
-  totalRoiPercent Decimal   @default(0) @db.Decimal(10, 2)
-  totalVolume     Decimal   @default(0) @db.Decimal(20, 8)
-  totalTrades     Int       @default(0)
-  winCount        Int       @default(0)
-  winRate         Decimal   @default(0) @db.Decimal(5, 2)
+  totalPnl        Decimal   @default(0) @map("total_pnl") @db.Decimal(20, 8)
+  totalRoiPercent Decimal   @default(0) @map("total_roi_percent") @db.Decimal(10, 2)
+  totalVolume     Decimal   @default(0) @map("total_volume") @db.Decimal(20, 8)
+  totalTrades     Int       @default(0) @map("total_trades")
+  winCount        Int       @default(0) @map("win_count")
+  winRate         Decimal   @default(0) @map("win_rate") @db.Decimal(5, 2)
   
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -87,12 +87,12 @@ model UserDailyStats {
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   dateUtc         DateTime  @map("date_utc")
 
-  totalPnl        Decimal   @default(0) @db.Decimal(20, 8)
-  totalRoiPercent Decimal   @default(0) @db.Decimal(10, 2)
-  totalVolume     Decimal   @default(0) @db.Decimal(20, 8)
-  totalTrades     Int       @default(0)
-  winCount        Int       @default(0)
-  winRate         Decimal   @default(0) @db.Decimal(5, 2)
+  totalPnl        Decimal   @default(0) @map("total_pnl") @db.Decimal(20, 8)
+  totalRoiPercent Decimal   @default(0) @map("total_roi_percent") @db.Decimal(10, 2)
+  totalVolume     Decimal   @default(0) @map("total_volume") @db.Decimal(20, 8)
+  totalTrades     Int       @default(0) @map("total_trades")
+  winCount        Int       @default(0) @map("win_count")
+  winRate         Decimal   @default(0) @map("win_rate") @db.Decimal(5, 2)
 
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -155,9 +155,9 @@ model TradeActivity {
   
 
   // Analytics Data (Decimal fields for calculation/sorting)
-  pnl             Decimal?  @db.Decimal(20, 8) // Profit/Loss in USD (payout - premium)
-  roiPercent      Decimal?  @db.Decimal(10, 2) // ROI in % ((payout - premium) / premium * 100)
-  normalizedVolume Decimal? @db.Decimal(20, 8) // Collateral amount as number
+  pnl             Decimal?  @db.Decimal(20, 8) @map("pnl") // Profit/Loss in USD (payout - premium)
+  roiPercent      Decimal?  @db.Decimal(10, 2) @map("roi_percent") // ROI in % ((payout - premium) / premium * 100)
+  normalizedVolume Decimal? @db.Decimal(20, 8) @map("normalized_volume") // Entry premium as normalized number
   
   @@index([userId, createdAt(sort: Desc)])          // User's trade history
   @@index([userId, status])                         // User's open/settled positions
