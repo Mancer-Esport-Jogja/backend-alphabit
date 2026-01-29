@@ -21,10 +21,10 @@ export const statsService = {
       SELECT
         DATE_TRUNC('day', t.close_timestamp AT TIME ZONE 'UTC')::date AS "dateUtc",
         SUM(COALESCE(t.pnl, 0)) AS "totalPnl",
-        SUM(COALESCE(t."normalizedVolume", 0)) AS "totalVolume",
+        SUM(COALESCE(t.normalized_volume, 0)) AS "totalVolume",
         COUNT(t.id)::int AS "totalTrades",
         SUM(CASE WHEN t.pnl > 0 THEN 1 ELSE 0 END)::int AS "winCount",
-        AVG(COALESCE(t."roiPercent", 0)) AS "totalRoiPercent"
+        AVG(COALESCE(t.roi_percent, 0)) AS "totalRoiPercent"
       FROM "trade_activities" t
       WHERE t.user_id = ${userId}
         AND t.status = 'SETTLED'
