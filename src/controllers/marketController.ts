@@ -33,4 +33,37 @@ export const marketController = {
       next(error);
     }
   },
+
+  /**
+   * Proxies Binance ticker price (current price)
+   * GET /api/market/ticker?symbol=ETHUSDT
+   */
+  getBinanceTicker: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { symbol = 'ETHUSDT' } = req.query;
+      
+      const binanceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`;
+      
+      const response = await fetch(binanceUrl);
+      
+      if (!response.ok) {
+        return res.status(response.status).json({
+          success: false,
+          error: {
+            code: 'BINANCE_ERROR',
+            message: `Binance API responded with status ${response.status}`,
+          },
+        });
+      }
+      
+      const data = await response.json();
+      
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
