@@ -15,6 +15,7 @@ interface LeaderboardEntry {
     totalTrades: number;
     winRate: number;
   };
+  streak: number;
 }
 
 export const leaderboardService = {
@@ -48,6 +49,7 @@ export const leaderboardService = {
       username: stat.user.username,
       displayName: stat.user.displayName,
       pfpUrl: stat.user.pfpUrl,
+      streak: stat.user.currentWinStreak,
       stats: {
         totalPnl: Number(stat.totalPnl),
         roi: Number(stat.totalRoiPercent),
