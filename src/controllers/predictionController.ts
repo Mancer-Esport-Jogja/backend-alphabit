@@ -1,0 +1,132 @@
+import { Request, Response } from 'express';
+import { prisma } from '../lib/prisma';
+
+// GET /active - Get current active prediction + stats
+export const getActivePrediction = async (req: Request, res: Response) => {
+    try {
+        // 1. Find the latest active prediction
+        const activePred = await prisma.aIPrediction.findFirst({
+            where: {
+                status: { in: ['ACTIVE'] },
+                expiryTime: { gt: new Date() } // Must not be expired
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                _count: {
+                    select: { votes: true }
+                }
+            }
+        });
+
+        if (!activePred) {
+            return res.json({ prediction: null });
+        }
+
+        // 2. Aggregate Votes (Sync vs Override)
+        const votes = await prisma.predictionVote.groupBy({
+            by: ['vote'],
+            where: { predictionId: activePred.id },
+            _count: { vote: true }
+        });
+
+        const syncCount = votes.find((v: any) => v.vote === 'SYNC')?._count.vote || 0;
+        const overrideCount = votes.find((v: any) => v.vote === 'OVERRIDE')?._count.vote || 0;
+        const totalVotes = syncCount + overrideCount;
+
+        // Calculate consensus percentage (Sync %)
+        const consensus = totalVotes > 0 ? Math.round((syncCount / totalVotes) * 100) : 50;
+
+        return res.json({
+            prediction: activePred,
+            stats: {
+                syncCount,
+                overrideCount,
+                totalVotes,
+                consensus // e.g., 75 means 75% agreed
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching active prediction:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// POST /create - Client triggers this when no active prediction exists
+export const createPrediction = async (req: Request, res: Response) => {
+    try {
+        const {
+            asset,
+            direction,
+            duration,
+            recommendedStrike,
+            confidence,
+            reasoning,
+            expiryTime
+        } = req.body;
+
+        // Validate if there's already an active one to prevent race conditions
+        // (Optional: we can just return the existing one if created recently)
+        const existing = await prisma.aIPrediction.findFirst({
+            where: {
+                status: 'ACTIVE',
+                expiryTime: { gt: new Date() }
+            }
+        });
+
+        if (existing) {
+            return res.status(409).json({ message: 'Active prediction already exists', prediction: existing });
+        }
+
+        const newPred = await prisma.aIPrediction.create({
+            data: {
+                asset,
+                direction,
+                duration,
+                recommendedStrike,
+                confidence,
+                reasoning,
+                expiryTime: new Date(expiryTime),
+                status: 'ACTIVE'
+            }
+        });
+
+        return res.status(201).json(newPred);
+
+    } catch (error) {
+        console.error('Error creating prediction:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// POST /vote - User votes Sync or Override
+export const votePrediction = async (req: Request, res: Response) => {
+    try {
+        const { predictionId, vote, userId } = req.body; // userId passed from client for now, auth later
+
+        if (!['SYNC', 'OVERRIDE'].includes(vote)) {
+            return res.status(400).json({ error: 'Invalid vote' });
+        }
+
+        const result = await prisma.predictionVote.upsert({
+            where: {
+                userId_predictionId: {
+                    userId,
+                    predictionId
+                }
+            },
+            update: { vote },
+            create: {
+                userId,
+                predictionId,
+                vote
+            }
+        });
+
+        return res.json(result);
+
+    } catch (error) {
+        console.error('Error voting:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
