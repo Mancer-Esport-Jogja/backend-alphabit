@@ -1,15 +1,25 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
-// GET /active - Get current active prediction + stats
+// GET /active - Get current active prediction + stats for a specific asset
 export const getActivePrediction = async (req: Request, res: Response) => {
     try {
+        const { asset } = req.query; // Optional: filter by asset (ETH/BTC)
+
+        // Build where clause
+        const whereClause: any = {
+            status: { in: ['ACTIVE'] },
+            expiryTime: { gt: new Date() }
+        };
+
+        // Add asset filter if provided
+        if (asset && typeof asset === 'string') {
+            whereClause.asset = asset;
+        }
+
         // 1. Find the latest active prediction
         const activePred = await prisma.aIPrediction.findFirst({
-            where: {
-                status: { in: ['ACTIVE'] },
-                expiryTime: { gt: new Date() } // Must not be expired
-            },
+            where: whereClause,
             orderBy: { createdAt: 'desc' },
             include: {
                 _count: {
@@ -69,17 +79,18 @@ export const createPrediction = async (req: Request, res: Response) => {
             startPrice // Expecting startPrice from client 
         } = req.body;
 
-        // Validate if there's already an active one to prevent race conditions
-        // (Optional: we can just return the existing one if created recently)
+        // Check if there's already an active prediction for THIS ASSET
         const existing = await prisma.aIPrediction.findFirst({
             where: {
+                asset: asset, // Filter by SAME asset only
                 status: 'ACTIVE',
                 expiryTime: { gt: new Date() }
             }
         });
 
         if (existing) {
-            return res.status(409).json({ message: 'Active prediction already exists', prediction: existing });
+            // Return existing prediction gracefully (not an error)
+            return res.status(200).json({ message: 'Active prediction already exists', prediction: existing });
         }
 
         const newPred = await prisma.aIPrediction.create({
