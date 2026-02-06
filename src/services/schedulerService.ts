@@ -3,6 +3,7 @@ import { configService } from './configService';
 import { syncAllActiveUsers, triggerIndexerUpdate, getExpiringTrades } from './tradeService';
 import { sendBatchNotification } from './notificationService';
 import * as cron from 'node-cron';
+import { predictionService } from './predictionService';
 
 // Store timeout reference for graceful shutdown
 let schedulerTimeout: NodeJS.Timeout | null = null;
@@ -19,7 +20,7 @@ export async function initScheduler(): Promise<void> {
   if (!enabled) {
     console.log('[Scheduler] Scheduler starts disabled (check config to enable)');
     return;
-  } 
+  }
 
   console.log(`[Scheduler] Starting scheduler service (Interval: ${interval}ms)...`);
 
@@ -36,7 +37,7 @@ export async function initScheduler(): Promise<void> {
  */
 export async function initExpiryReminderCron(): Promise<void> {
   const enabled = (await configService.get('EXPIRY_REMINDER_ENABLED', 'true')) === 'true';
-  
+
   if (!enabled) {
     console.log('[Scheduler] Expiry reminder cron disabled');
     return;
@@ -60,12 +61,12 @@ export async function initExpiryReminderCron(): Promise<void> {
 export async function sendExpiryReminders(): Promise<void> {
   try {
     const fids = await getExpiringTrades(60); // 60 minutes
-    
+
     if (fids.length === 0) {
       console.log('[Scheduler] No expiring trades found, skipping notification');
       return;
     }
-    
+
     await sendBatchNotification('TRADE_EXPIRING_SOON', fids);
     console.log(`[Scheduler] Sent expiry reminder to ${fids.length} users`);
   } catch (error) {
@@ -95,7 +96,7 @@ export function stopScheduler(): void {
  */
 async function scheduleNextLoop(delay: number) {
   if (schedulerTimeout) clearTimeout(schedulerTimeout);
-  
+
   schedulerTimeout = setTimeout(async () => {
     if (!isSchedulerRunning) return;
 
@@ -114,7 +115,7 @@ async function scheduleNextLoop(delay: number) {
       console.error('[Scheduler] Error in scheduler loop:', error);
       // Retry after default interval on error
       if (isSchedulerRunning) {
-        scheduleNextLoop(900000); 
+        scheduleNextLoop(900000);
       }
     }
   }, delay);
@@ -128,21 +129,25 @@ async function scheduleNextLoop(delay: number) {
  */
 export async function runScheduledSync(): Promise<void> {
   const startTime = Date.now();
-  
+
   try {
     // Step 1: Trigger indexer update
     console.log('[Scheduler] Triggering indexer update...');
     await triggerIndexerUpdate();
-    
+
     // Step 2: Wait for indexer to process
     const delayMs = parseInt(await configService.get('SYNC_DELAY_AFTER_UPDATE'), 10) || 10000;
     console.log(`[Scheduler] Waiting ${delayMs}ms for indexer to process...`);
     await sleep(delayMs);
-    
-    // Step 3: Sync all active users
+
+    // Step 3: Settle Expired AI Predictions (New)
+    console.log('[Scheduler] Checking for expired AI predictions...');
+    await predictionService.settleExpiredPredictions();
+
+    // Step 4: Sync all active users
     console.log('[Scheduler] Syncing all active users...');
     const result = await syncAllActiveUsers();
-    
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`[Scheduler] Sync cycle completed in ${duration}s:`, {
       usersProcessed: result.usersProcessed,

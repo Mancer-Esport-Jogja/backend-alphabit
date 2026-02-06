@@ -48,7 +48,10 @@ export const getActivePrediction = async (req: Request, res: Response) => {
 
     } catch (error) {
         console.error('Error fetching active prediction:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error)
+        });
     }
 };
 
@@ -62,7 +65,8 @@ export const createPrediction = async (req: Request, res: Response) => {
             recommendedStrike,
             confidence,
             reasoning,
-            expiryTime
+            expiryTime,
+            startPrice // Expecting startPrice from client 
         } = req.body;
 
         // Validate if there's already an active one to prevent race conditions
@@ -87,6 +91,7 @@ export const createPrediction = async (req: Request, res: Response) => {
                 confidence,
                 reasoning,
                 expiryTime: new Date(expiryTime),
+                startPrice: startPrice ? Number(startPrice) : undefined, // Store it
                 status: 'ACTIVE'
             }
         });
@@ -95,7 +100,10 @@ export const createPrediction = async (req: Request, res: Response) => {
 
     } catch (error) {
         console.error('Error creating prediction:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error)
+        });
     }
 };
 
@@ -127,6 +135,9 @@ export const votePrediction = async (req: Request, res: Response) => {
 
     } catch (error) {
         console.error('Error voting:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error)
+        });
     }
 };
