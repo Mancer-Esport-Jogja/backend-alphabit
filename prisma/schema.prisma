@@ -11,6 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -171,8 +172,8 @@ model TradeActivity {
   @@index([userId, closeTimestamp])                 // PnL history filtering
   @@index([userId, entryTimestamp])                 // Distribution filtering
   @@index([userId, pnl])                            // Leaderboard sorting
-  @@index([userId, roiPercent])                     // Leaderboard sorting
-  @@index([userId, normalizedVolume])               // Leaderboard sorting (Volume)
+  @@index([userId, roiPercent], map: "trade_activities_user_id_roiPercent_idx")                     // Leaderboard sorting
+  @@index([userId, normalizedVolume], map: "trade_activities_user_id_normalizedVolume_idx")               // Leaderboard sorting (Volume)
   
   @@map("trade_activities")
 }
