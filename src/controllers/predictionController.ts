@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma';
 // GET /active - Get current active prediction + stats for a specific asset
 export const getActivePrediction = async (req: Request, res: Response) => {
     try {
-        const { asset } = req.query; // Optional: filter by asset (ETH/BTC)
+        const { asset, userId } = req.query; // Optional: filter by asset (ETH/BTC) and check user vote
 
         // Build where clause
         const whereClause: any = {
@@ -46,6 +46,20 @@ export const getActivePrediction = async (req: Request, res: Response) => {
         // Calculate consensus percentage (Sync %)
         const consensus = totalVotes > 0 ? Math.round((syncCount / totalVotes) * 100) : 50;
 
+        // 3. Check if user has already voted (if userId provided)
+        let userVote: string | null = null;
+        if (userId && typeof userId === 'string') {
+            const existingVote = await prisma.predictionVote.findUnique({
+                where: {
+                    userId_predictionId: {
+                        userId: userId,
+                        predictionId: activePred.id
+                    }
+                }
+            });
+            userVote = existingVote?.vote || null;
+        }
+
         return res.json({
             prediction: activePred,
             stats: {
@@ -53,7 +67,8 @@ export const getActivePrediction = async (req: Request, res: Response) => {
                 overrideCount,
                 totalVotes,
                 consensus // e.g., 75 means 75% agreed
-            }
+            },
+            userVote // 'SYNC' | 'OVERRIDE' | null
         });
 
     } catch (error) {
