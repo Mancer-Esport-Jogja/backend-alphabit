@@ -1,0 +1,123 @@
+{
+"user_daily_stats": [
+	{
+		"id" : "21f257ae-21e5-4833-9293-0b375bf133d4",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-06T17:00:00.000Z",
+		"totalPnl" : -0.61788700,
+		"totalRoiPercent" : -27.97,
+		"totalVolume" : 299.96600000,
+		"totalTrades" : 2,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:19.946Z"
+	},
+	{
+		"id" : "10fea684-e307-4f28-bc27-69cfa6919313",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-19T17:00:00.000Z",
+		"totalPnl" : 2.64392400,
+		"totalRoiPercent" : 86.73,
+		"totalVolume" : 499.87500000,
+		"totalTrades" : 2,
+		"winCount" : 1,
+		"winRate" : 50.00,
+		"updated_at" : "2026-01-24T11:25:20.197Z"
+	},
+	{
+		"id" : "0a3d1484-af68-4512-8094-21725b3b18d8",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-21T17:00:00.000Z",
+		"totalPnl" : -0.01888400,
+		"totalRoiPercent" : -0.33,
+		"totalVolume" : 399.87700000,
+		"totalTrades" : 3,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:20.447Z"
+	},
+	{
+		"id" : "8c94c8bd-d073-43bb-a656-21bf798eed3f",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-05T17:00:00.000Z",
+		"totalPnl" : 1.61695400,
+		"totalRoiPercent" : 17.20,
+		"totalVolume" : 1299.81200000,
+		"totalTrades" : 4,
+		"winCount" : 2,
+		"winRate" : 50.00,
+		"updated_at" : "2026-01-24T11:25:20.697Z"
+	},
+	{
+		"id" : "d69585ec-26df-4681-b4d1-5fc725e752b5",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-07T17:00:00.000Z",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 99.99000000,
+		"totalTrades" : 1,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:20.947Z"
+	},
+	{
+		"id" : "de5f2b8d-4813-41bc-9313-ec5181128e86",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-20T17:00:00.000Z",
+		"totalPnl" : 2.44417600,
+		"totalRoiPercent" : 78.22,
+		"totalVolume" : 400.03600000,
+		"totalTrades" : 2,
+		"winCount" : 1,
+		"winRate" : 50.00,
+		"updated_at" : "2026-01-24T11:25:21.198Z"
+	},
+	{
+		"id" : "c25a98ae-dcfa-400b-aa99-1898fac6ff42",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-10T17:00:00.000Z",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 2299.77022500,
+		"totalTrades" : 6,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:21.448Z"
+	},
+	{
+		"id" : "6ba4546e-1c4d-48dc-ac3b-40ba82882ab2",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-09T17:00:00.000Z",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 199.98027500,
+		"totalTrades" : 2,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:21.698Z"
+	},
+	{
+		"id" : "30d41437-a640-46a0-b832-21332bd29b05",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-23T17:00:00.000Z",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 199.98300000,
+		"totalTrades" : 1,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:21.947Z"
+	},
+	{
+		"id" : "d6e4c633-b35b-4495-bcd5-3554357972d1",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"date_utc" : "2026-01-08T17:00:00.000Z",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 399.96112500,
+		"totalTrades" : 3,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:22.197Z"
+	}
+]}

@@ -1,0 +1,19 @@
+{
+"users": [
+	{
+		"id" : "cmksadeto0000l0a3qi47rj3y",
+		"fid" : 1372451,
+		"created_at" : "2026-01-24T05:28:51.660Z",
+		"updated_at" : "2026-01-24T11:25:19.200Z",
+		"last_active_at" : "2026-01-24T05:28:51.660Z",
+		"display_name" : "Development User",
+		"pfp_url" : "https:\/\/i.imgur.com\/YQwNqvu.png",
+		"primary_eth_address" : "0xcb21bca1bdb38fd9c92880adc06124c533f7277b",
+		"username" : "dev_user",
+		"current_login_streak" : 0,
+		"current_win_streak" : 0,
+		"last_login_date" : null,
+		"max_login_streak" : 0,
+		"max_win_streak" : 2
+	}
+]}

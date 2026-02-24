@@ -8,7 +8,14 @@ const connectionString = process.env.DATABASE_URL;
 console.log('[DEBUG] lib/prisma: Connection String exists?', !!connectionString);
 console.log('[DEBUG] lib/prisma: Connection String start:', connectionString?.substring(0, 15));
 
-const pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } });
+const shouldUseSsl =
+  process.env.DATABASE_SSL === 'true' ||
+  (connectionString?.includes('sslmode=require') ?? false);
+
+const pool = new Pool({
+  connectionString,
+  ssl: shouldUseSsl ? { rejectUnauthorized: false } : false
+});
 const adapter = new PrismaPg(pool);
 
 // Prevent multiple instances of Prisma Client in development

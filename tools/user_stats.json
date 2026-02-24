@@ -1,0 +1,51 @@
+{
+"user_stats": [
+	{
+		"id" : "6f878f6b-ed1f-42f3-8584-00a83bb9f6b9",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"period" : "24h",
+		"totalPnl" : 0E-8,
+		"totalRoiPercent" : 0.00,
+		"totalVolume" : 199.98300000,
+		"totalTrades" : 1,
+		"winCount" : 0,
+		"winRate" : 0.00,
+		"updated_at" : "2026-01-24T11:25:22.695Z"
+	},
+	{
+		"id" : "73be5cd2-a32c-4626-a645-c796bef45c60",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"period" : "7d",
+		"totalPnl" : 5.06921600,
+		"totalRoiPercent" : 41.16,
+		"totalVolume" : 1499.77100000,
+		"totalTrades" : 8,
+		"winCount" : 2,
+		"winRate" : 25.00,
+		"updated_at" : "2026-01-24T11:25:23.193Z"
+	},
+	{
+		"id" : "85dde746-7ca3-492d-87c7-bdcd2a7d266f",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"period" : "30d",
+		"totalPnl" : 6.06828300,
+		"totalRoiPercent" : 15.39,
+		"totalVolume" : 6099.25062500,
+		"totalTrades" : 26,
+		"winCount" : 4,
+		"winRate" : 15.38,
+		"updated_at" : "2026-01-24T11:25:23.692Z"
+	},
+	{
+		"id" : "ba30efbf-d3c7-437b-b691-f861e6945602",
+		"user_id" : "cmksadeto0000l0a3qi47rj3y",
+		"period" : "all",
+		"totalPnl" : 6.06828300,
+		"totalRoiPercent" : 15.39,
+		"totalVolume" : 6099.25062500,
+		"totalTrades" : 26,
+		"winCount" : 4,
+		"winRate" : 15.38,
+		"updated_at" : "2026-01-24T11:25:24.190Z"
+	}
+]}
