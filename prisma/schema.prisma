@@ -46,6 +46,7 @@ model User {
   @@index([primaryEthAddress])
   @@map("users")
   userStats          UserStats[]
+  predictionVotes    PredictionVote[]
 }
 
 enum UserStatus {
@@ -170,8 +171,8 @@ model TradeActivity {
   @@index([userId, closeTimestamp])                 // PnL history filtering
   @@index([userId, entryTimestamp])                 // Distribution filtering
   @@index([userId, pnl])                            // Leaderboard sorting
-  @@index([userId, roiPercent])                     // Leaderboard sorting
-  @@index([userId, normalizedVolume])               // Leaderboard sorting (Volume)
+  @@index([userId, roiPercent], map: "trade_activities_user_id_roiPercent_idx")                     // Leaderboard sorting
+  @@index([userId, normalizedVolume], map: "trade_activities_user_id_normalizedVolume_idx")               // Leaderboard sorting (Volume)
   
   @@map("trade_activities")
 }
@@ -204,3 +205,54 @@ model NotificationTemplate {
   @@map("notification_templates")
 }
 
+
+// --- AI PREDICTION & VOTING (Arcade Mode) ---
+
+enum PredictionStatus {
+  ACTIVE
+  SETTLED
+  EXPIRED
+}
+
+model AIPrediction {
+  id              String           @id @default(cuid())
+  asset           String           // "ETH" | "BTC"
+  direction       String           // "MOON" | "DOOM"
+  duration        String           // "BLITZ", etc
+  recommendedStrike Decimal        @db.Decimal(20, 8)
+  confidence      Int
+  reasoning       String           @db.Text
+  
+  status          PredictionStatus @default(ACTIVE)
+  
+  // Timing
+  createdAt       DateTime         @default(now()) @map("created_at")
+  expiryTime      DateTime         @map("expiry_time")
+  settledAt       DateTime?        @map("settled_at")
+  
+  // Settlement
+  startPrice      Decimal?         @map("start_price") @db.Decimal(20, 8)
+  endPrice        Decimal?         @map("end_price") @db.Decimal(20, 8)
+  result          String?          // "WIN" | "LOSS" (Did the AI get it right?)
+
+  votes           PredictionVote[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_predictions")
+}
+
+model PredictionVote {
+  id              String       @id @default(cuid())
+  userId          String       @map("user_id")
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  predictionId    String       @map("prediction_id")
+  prediction      AIPrediction @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+  
+  vote            String       // "SYNC" (Yes) | "OVERRIDE" (No)
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  @@unique([userId, predictionId]) // One vote per user per round
+  @@map("prediction_votes")
+}
